@@ -158,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
 
     toast({
-      title: "Đã đăng xuất", 
+      title: "Đã đăng xuất",
       description: "Bạn đã đăng xuất khỏi hệ thống",
     });
   };
