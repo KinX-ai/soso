@@ -39,14 +39,23 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
+    // Kill any existing process on port 5000
+    await new Promise((resolve) => {
+      const cmd = require('child_process').exec('fuser -k 5000/tcp');
+      cmd.on('exit', resolve);
+    });
+
     // Thiết lập và khởi tạo cơ sở dữ liệu
     await setupDatabase().catch(error => {
-      console.error('Lỗi khi thiết lập cơ sở dữ liệu:', error);
+      if (error.code === '23505') { // Duplicate key error
+        console.log('Admin account already exists, continuing...');
+      } else {
+        console.error('Lỗi khi thiết lập cơ sở dữ liệu:', error);
+      }
     });
     log('Cơ sở dữ liệu đã được thiết lập thành công');
   } catch (error) {
     console.error('Lỗi khi khởi tạo cơ sở dữ liệu:', error);
-    // Tiếp tục khởi động server ngay cả khi có lỗi
   }
   
   const server = await registerRoutes(app);

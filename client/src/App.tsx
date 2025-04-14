@@ -38,6 +38,7 @@ function Router() {
       <Route path="/admin/transactions" component={AdminTransactionsPage} />
       <Route path="/admin/settings" component={AdminSettingsPage} />
       <Route path="/admin/lottery" component={AdminLotteryPage} />
+      <Route path="/soi-cau" component={LotteryStatsPage} /> {/* Added based on user message */}
       <Route component={NotFound} />
     </Switch>
   );
