@@ -179,11 +179,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     updateUserData
-    isAdmin,
-    login,
-    register,
-    logout,
-    updateUserData
   };
 
   return (
