@@ -324,22 +324,27 @@ export async function setupDatabase() {
   } catch (error) {
     console.error('Lỗi khi thiết lập cơ sở dữ liệu:', error);
     throw error;
-  } finally {
-    // Đảm bảo đóng kết nối sau khi hoàn tất
+  }
+  // Không đóng kết nối pool ở đây vì server vẫn cần sử dụng nó
+}
+
+// Hàm này dùng khi chạy script độc lập, sẽ đóng kết nối sau khi hoàn tất
+export async function setupDatabaseAndClose() {
+  try {
+    await setupDatabase();
+    console.log('Hoàn tất thiết lập cơ sở dữ liệu.');
+    // Đóng kết nối sau khi hoàn tất
     await pool.end();
+  } catch (error) {
+    console.error('Lỗi:', error);
+    throw error;
   }
 }
 
 // Chạy thiết lập nếu được gọi trực tiếp
 // Cách kiểm tra nếu file được chạy trực tiếp trong môi trường ESM
 if (import.meta.url.endsWith(process.argv[1])) {
-  setupDatabase()
-    .then(() => {
-      console.log('Hoàn tất thiết lập cơ sở dữ liệu.');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Lỗi:', error);
-      process.exit(1);
-    });
+  setupDatabaseAndClose()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
 }
