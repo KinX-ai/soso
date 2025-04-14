@@ -1,10 +1,6 @@
-import { 
-  users, transactions, lotteryResults, bets, settings, numberStats,
-  type User, type InsertUser, type Transaction, type InsertTransaction, 
-  type LotteryResult, type InsertLotteryResult, type Bet, 
-  type InsertBet, type Setting, type InsertSetting, 
-  type NumberStat, type InsertNumberStat, type BetType
-} from "@shared/schema";
+import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, lotteryResults, type LotteryResult, type InsertLotteryResult, bets, type Bet, type InsertBet, settings, type Setting, numberStats, type NumberStat, type InsertNumberStat } from "@shared/schema";
+import { db } from './db';
+import { eq, desc, asc, and, lte, gte, sql } from 'drizzle-orm';
 
 export interface IStorage {
   // User operations
@@ -46,520 +42,522 @@ export interface IStorage {
   getNumberAbsence(region: string, limit?: number): Promise<{number: string, days: number}[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private transactions: Map<number, Transaction>;
-  private lotteryResults: Map<number, LotteryResult>;
-  private bets: Map<number, Bet>;
-  private settings: Map<string, Setting>;
-  private numberStats: Map<string, NumberStat>; // Composite key: number-date-region
-  
-  private currentUserId: number;
-  private currentTransactionId: number;
-  private currentLotteryResultId: number;
-  private currentBetId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.transactions = new Map();
-    this.lotteryResults = new Map();
-    this.bets = new Map();
-    this.settings = new Map();
-    this.numberStats = new Map();
-    
-    this.currentUserId = 1;
-    this.currentTransactionId = 1;
-    this.currentLotteryResultId = 1;
-    this.currentBetId = 1;
-    
-    // Initialize default settings
-    this.initializeSettings();
-  }
-
-  private initializeSettings() {
-    const defaultSettings = [
-      {
-        key: "betting_rates",
-        value: {
-          lo: 99.5,
-          de: 99,
-          "3cang": 700,
-          lo_xien_2: 17,
-          lo_xien_3: 70,
-          lo_xien_4: 150
-        },
-        description: "Payout rates for different bet types"
-      },
-      {
-        key: "min_bet_amount",
-        value: 10000,
-        description: "Minimum bet amount in VND"
-      },
-      {
-        key: "max_bet_amount",
-        value: 10000000,
-        description: "Maximum bet amount in VND"
-      },
-      {
-        key: "lottery_schedule",
-        value: { time: "18:15" },
-        description: "Daily lottery draw time"
-      }
-    ];
-    
-    defaultSettings.forEach(setting => {
-      this.settings.set(setting.key, {
-        ...setting,
-        updatedAt: new Date()
-      });
-    });
-  }
-
-  // User operations
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase()
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email.toLowerCase() === email.toLowerCase()
-    );
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const now = new Date();
-    
-    const user: User = {
-      id,
-      ...userData,
-      balance: 0,
-      role: "user",
-      isActive: true,
-      createdAt: now
-    };
-    
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    
-    const updatedUser = { ...user, ...userData };
-    this.users.set(id, updatedUser);
-    
-    return updatedUser;
+    const [user] = await db.update(users).set(userData).where(eq(users.id, id)).returning();
+    return user;
   }
 
   async getAllUsers(filter?: Partial<User>): Promise<User[]> {
-    let users = Array.from(this.users.values());
+    if (!filter) {
+      return db.select().from(users);
+    }
+
+    // Build dynamic where clauses based on filter
+    const whereConditions = [];
     
-    if (filter) {
-      users = users.filter(user => {
-        return Object.entries(filter).every(([key, value]) => {
-          return user[key as keyof User] === value;
-        });
-      });
+    if (filter.id) whereConditions.push(eq(users.id, filter.id));
+    if (filter.username) whereConditions.push(eq(users.username, filter.username));
+    if (filter.email) whereConditions.push(eq(users.email, filter.email));
+    if (filter.role) whereConditions.push(eq(users.role, filter.role));
+    
+    if (whereConditions.length === 0) {
+      return db.select().from(users);
     }
     
-    return users;
+    return db.select().from(users).where(and(...whereConditions));
   }
 
-  // Transaction operations
   async createTransaction(transactionData: InsertTransaction): Promise<Transaction> {
-    const id = this.currentTransactionId++;
-    const now = new Date();
+    // Update user balance if transaction is deposit or withdrawal
+    if (transactionData.type === 'deposit' || transactionData.type === 'withdrawal') {
+      const user = await this.getUser(transactionData.userId);
+      if (user) {
+        const balanceChange = transactionData.type === 'deposit' 
+          ? transactionData.amount 
+          : -transactionData.amount;
+          
+        await this.updateUser(user.id, { 
+          balance: (user.balance || 0) + balanceChange 
+        });
+      }
+    }
     
-    const transaction: Transaction = {
-      id,
-      ...transactionData,
-      status: "pending",
-      createdAt: now,
-      updatedAt: now
-    };
-    
-    this.transactions.set(id, transaction);
+    const [transaction] = await db.insert(transactions).values(transactionData).returning();
     return transaction;
   }
 
   async getTransaction(id: number): Promise<Transaction | undefined> {
-    return this.transactions.get(id);
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return transaction;
   }
 
   async getUserTransactions(userId: number): Promise<Transaction[]> {
-    return Array.from(this.transactions.values())
-      .filter(transaction => transaction.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return db.select().from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.createdAt));
   }
 
   async updateTransaction(id: number, transactionData: Partial<Transaction>): Promise<Transaction | undefined> {
-    const transaction = this.transactions.get(id);
-    if (!transaction) return undefined;
-    
-    const now = new Date();
-    const updatedTransaction = { 
-      ...transaction, 
-      ...transactionData,
-      updatedAt: now
-    };
-    
-    this.transactions.set(id, updatedTransaction);
-    
-    // If transaction is completed and it's a deposit, update user balance
-    if (updatedTransaction.status === "completed" && updatedTransaction.type === "deposit") {
-      const user = await this.getUser(updatedTransaction.userId);
-      if (user) {
-        await this.updateUser(user.id, {
-          balance: user.balance + updatedTransaction.amount
-        });
+    // Check if status is being updated to 'approved' for deposits and withdrawals
+    if (transactionData.status === 'approved') {
+      const transaction = await this.getTransaction(id);
+      if (transaction && transaction.status !== 'approved') {
+        const user = await this.getUser(transaction.userId);
+        if (user) {
+          // Only update balance if status is changing to approved
+          if (transaction.type === 'deposit') {
+            await this.updateUser(user.id, { 
+              balance: (user.balance || 0) + transaction.amount 
+            });
+          } else if (transaction.type === 'withdrawal' && transaction.status !== 'approved') {
+            // For withdrawals, we already reduced balance on creation if status was pending
+            // Only reduce balance if the withdrawal was previously rejected
+            if (transaction.status === 'rejected') {
+              await this.updateUser(user.id, { 
+                balance: (user.balance || 0) - transaction.amount 
+              });
+            }
+          }
+        }
       }
     }
     
-    // If transaction is completed and it's a withdrawal, update user balance
-    if (updatedTransaction.status === "completed" && updatedTransaction.type === "withdrawal") {
-      const user = await this.getUser(updatedTransaction.userId);
-      if (user) {
-        await this.updateUser(user.id, {
-          balance: Math.max(0, user.balance - updatedTransaction.amount)
-        });
-      }
-    }
-    
+    const [updatedTransaction] = await db.update(transactions)
+      .set(transactionData)
+      .where(eq(transactions.id, id))
+      .returning();
+      
     return updatedTransaction;
   }
 
   async getAllTransactions(filter?: Partial<Transaction>): Promise<Transaction[]> {
-    let transactions = Array.from(this.transactions.values());
-    
-    if (filter) {
-      transactions = transactions.filter(transaction => {
-        return Object.entries(filter).every(([key, value]) => {
-          return transaction[key as keyof Transaction] === value;
-        });
-      });
+    if (!filter) {
+      return db.select().from(transactions).orderBy(desc(transactions.createdAt));
     }
     
-    return transactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    // Build dynamic where clauses based on filter
+    const whereConditions = [];
+    
+    if (filter.id) whereConditions.push(eq(transactions.id, filter.id));
+    if (filter.userId) whereConditions.push(eq(transactions.userId, filter.userId));
+    if (filter.type) whereConditions.push(eq(transactions.type, filter.type));
+    if (filter.status) whereConditions.push(eq(transactions.status, filter.status));
+    
+    if (whereConditions.length === 0) {
+      return db.select().from(transactions).orderBy(desc(transactions.createdAt));
+    }
+    
+    return db.select()
+      .from(transactions)
+      .where(and(...whereConditions))
+      .orderBy(desc(transactions.createdAt));
   }
 
-  // Lottery results operations
   async addLotteryResult(resultData: InsertLotteryResult): Promise<LotteryResult> {
-    const id = this.currentLotteryResultId++;
-    const now = new Date();
+    const [result] = await db.insert(lotteryResults).values(resultData).returning();
     
-    const result: LotteryResult = {
-      id,
-      ...resultData,
-      createdAt: now,
-      updatedAt: now
-    };
+    // Update number stats
+    await this.updateNumberStats(result);
     
-    this.lotteryResults.set(id, result);
-    
-    // Update bets based on this result
-    this.settleBetsForDate(result.date, result.region);
+    // Settle bets for this date and region
+    await this.settleBetsForDate(new Date(result.date), result.region);
     
     return result;
   }
 
+  private async updateNumberStats(result: LotteryResult): Promise<void> {
+    // Extract all numbers from the result
+    const allNumbers: string[] = [];
+    
+    // Special prize (2 last digits)
+    const specialLastTwo = result.special.slice(-2);
+    allNumbers.push(specialLastTwo);
+    
+    // First prize (2 last digits)
+    const firstLastTwo = result.first.slice(-2);
+    allNumbers.push(firstLastTwo);
+    
+    // All other prizes (2 last digits)
+    const otherNumbers = [
+      ...result.second,
+      ...result.third,
+      ...result.fourth,
+      ...result.fifth,
+      ...result.sixth,
+      ...result.seventh
+    ].map(num => num.slice(-2));
+    
+    allNumbers.push(...otherNumbers);
+    
+    // Create number stat entries for each unique number
+    const uniqueNumbers = [...new Set(allNumbers)];
+    const date = new Date(result.date);
+    
+    for (const number of uniqueNumbers) {
+      // Create or update number stat
+      await this.addNumberStat({
+        number,
+        date: date.toISOString(),
+        region: result.region,
+        isPresent: true
+      });
+    }
+    
+    // For numbers not present, create absence entries
+    const allPossibleNumbers = Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0'));
+    const absentNumbers = allPossibleNumbers.filter(num => !uniqueNumbers.includes(num));
+    
+    for (const number of absentNumbers) {
+      await this.addNumberStat({
+        number,
+        date: date.toISOString(),
+        region: result.region,
+        isPresent: false
+      });
+    }
+  }
+
   private async settleBetsForDate(date: Date, region: string): Promise<void> {
-    const dateStart = new Date(date);
-    dateStart.setHours(0, 0, 0, 0);
+    // Get all bets for this date
+    const dateStr = date.toISOString().split('T')[0];
+    const startOfDay = new Date(dateStr);
+    const endOfDay = new Date(dateStr);
+    endOfDay.setHours(23, 59, 59, 999);
     
-    const dateEnd = new Date(date);
-    dateEnd.setHours(23, 59, 59, 999);
+    const betsToSettle = await db.select().from(bets)
+      .where(
+        and(
+          gte(bets.date, startOfDay.toISOString()),
+          lte(bets.date, endOfDay.toISOString()),
+          eq(bets.status, 'pending')
+        )
+      );
     
-    const betsForDate = Array.from(this.bets.values()).filter(bet => {
-      const betDate = new Date(bet.date);
-      return betDate >= dateStart && betDate <= dateEnd && bet.status === "pending";
-    });
+    if (betsToSettle.length === 0) return;
     
-    const result = await this.getLatestLotteryResult(region);
+    // Get the lottery result for this date and region
+    const [result] = await db.select()
+      .from(lotteryResults)
+      .where(
+        and(
+          gte(lotteryResults.date, startOfDay.toISOString()),
+          lte(lotteryResults.date, endOfDay.toISOString()),
+          eq(lotteryResults.region, region)
+        )
+      );
+    
     if (!result) return;
     
-    const settingObj = await this.getSetting("betting_rates");
-    const rates = settingObj?.value || {
-      lo: 99.5,
-      de: 99,
-      "3cang": 700,
-      lo_xien_2: 17,
-      lo_xien_3: 70,
-      lo_xien_4: 150
-    };
-    
     // Process each bet
-    for (const bet of betsForDate) {
-      let won = false;
+    for (const bet of betsToSettle) {
+      // Skip bets that have already been settled
+      if (bet.status !== 'pending') continue;
+      
+      let isWin = false;
       let payout = 0;
       
-      switch (bet.type) {
-        case "lo":
-          // Check if bet numbers appear in any prize
-          won = this.checkLoWin(bet.numbers as string[], result);
-          if (won) {
-            payout = bet.amount * (rates.lo as number);
-          }
-          break;
-          
-        case "de":
-          // Check if bet numbers match last 2 digits of special prize
-          const specialLast2 = result.special.slice(-2);
-          won = (bet.numbers as string[]).includes(specialLast2);
-          if (won) {
-            payout = bet.amount * (rates.de as number);
-          }
-          break;
-          
-        case "3cang":
-          // Check if bet numbers match last 3 digits of special prize
-          const specialLast3 = result.special.slice(-3);
-          won = (bet.numbers as string[]).includes(specialLast3);
-          if (won) {
-            payout = bet.amount * (rates["3cang"] as number);
-          }
-          break;
-          
-        case "lo_xien_2":
-        case "lo_xien_3":
-        case "lo_xien_4":
-          // For xiên bets, all numbers must appear
-          const allNumbersWon = (bet.numbers as string[]).every(num => 
-            this.checkLoWin([num], result)
-          );
-          
-          if (allNumbersWon) {
-            won = true;
-            payout = bet.amount * (rates[bet.type] as number);
-          }
-          break;
+      // Check different bet types
+      if (bet.type === 'lo') {
+        isWin = this.checkLoWin(bet.numbers, result);
+      } else if (bet.type === 'de') {
+        isWin = bet.numbers.includes(result.special.slice(-2));
+      } else if (bet.type === '3cang') {
+        isWin = bet.numbers.includes(result.special.slice(-3));
+      } else if (bet.type.startsWith('lo_xien')) {
+        // For lô xiên, all numbers must appear in the results
+        isWin = bet.numbers.every(num => {
+          return this.checkLoWin([num], result);
+        });
       }
       
-      // Update bet status and payout
-      await this.updateBet(bet.id, {
-        status: won ? "won" : "lost",
-        payout: won ? payout : 0,
-        settledAt: new Date()
-      });
-      
-      // If bet is won, update user balance
-      if (won) {
+      // Calculate payout if bet won
+      if (isWin) {
+        payout = bet.amount * bet.multiplier;
+        
+        // Credit user account with winnings
         const user = await this.getUser(bet.userId);
         if (user) {
           await this.updateUser(user.id, {
-            balance: user.balance + payout
+            balance: (user.balance || 0) + payout
+          });
+          
+          // Create transaction record for the win
+          await this.createTransaction({
+            userId: user.id,
+            type: 'winning',
+            amount: payout,
+            status: 'approved',
+            description: `Thắng cược ${bet.type} - ${bet.numbers.join(', ')}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           });
         }
       }
+      
+      // Update bet status
+      await this.updateBet(bet.id, {
+        status: isWin ? 'win' : 'lose',
+        result: result.id,
+        payout: isWin ? payout : 0,
+        updatedAt: new Date().toISOString()
+      });
     }
   }
 
   private checkLoWin(numbers: string[], result: LotteryResult): boolean {
-    // Extract all 2-digit combinations from the result
-    const allNumbers: string[] = [];
+    // Extract all 2-digit numbers from the lottery result
+    const allNumbers = [
+      result.special.slice(-2),
+      result.first.slice(-2),
+      ...result.second.map(num => num.slice(-2)),
+      ...result.third.map(num => num.slice(-2)),
+      ...result.fourth.map(num => num.slice(-2)),
+      ...result.fifth.map(num => num.slice(-2)),
+      ...result.sixth.map(num => num.slice(-2)),
+      ...result.seventh.map(num => num.slice(-2))
+    ];
     
-    // Special prize
-    for (let i = 0; i < result.special.length - 1; i++) {
-      allNumbers.push(result.special.substring(i, i + 2));
-    }
-    
-    // First prize
-    for (let i = 0; i < result.first.length - 1; i++) {
-      allNumbers.push(result.first.substring(i, i + 2));
-    }
-    
-    // Other prizes (arrays)
-    [result.second, result.third, result.fourth, result.fifth, result.sixth, result.seventh].forEach(prizeArray => {
-      if (Array.isArray(prizeArray)) {
-        prizeArray.forEach(prize => {
-          for (let i = 0; i < prize.length - 1; i++) {
-            allNumbers.push(prize.substring(i, i + 2));
-          }
-        });
-      }
-    });
-    
-    // Check if any of the bet numbers appear in the results
+    // Check if any of the bet numbers appear in the result
     return numbers.some(num => allNumbers.includes(num));
   }
 
   async getLotteryResultsByDate(date: Date): Promise<LotteryResult[]> {
-    const dateStart = new Date(date);
-    dateStart.setHours(0, 0, 0, 0);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     
-    const dateEnd = new Date(date);
-    dateEnd.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
     
-    return Array.from(this.lotteryResults.values())
-      .filter(result => {
-        const resultDate = new Date(result.date);
-        return resultDate >= dateStart && resultDate <= dateEnd;
-      })
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    return db.select()
+      .from(lotteryResults)
+      .where(
+        and(
+          gte(lotteryResults.date, startOfDay.toISOString()),
+          lte(lotteryResults.date, endOfDay.toISOString())
+        )
+      );
   }
 
   async getLotteryResultsByRegion(region: string, limit: number = 10): Promise<LotteryResult[]> {
-    return Array.from(this.lotteryResults.values())
-      .filter(result => result.region === region)
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, limit);
+    return db.select()
+      .from(lotteryResults)
+      .where(eq(lotteryResults.region, region))
+      .orderBy(desc(lotteryResults.date))
+      .limit(limit);
   }
 
   async getLatestLotteryResult(region: string): Promise<LotteryResult | undefined> {
-    const results = await this.getLotteryResultsByRegion(region, 1);
-    return results.length > 0 ? results[0] : undefined;
+    const [result] = await db.select()
+      .from(lotteryResults)
+      .where(eq(lotteryResults.region, region))
+      .orderBy(desc(lotteryResults.date))
+      .limit(1);
+      
+    return result;
   }
 
-  // Betting operations
   async createBet(betData: InsertBet): Promise<Bet> {
-    const id = this.currentBetId++;
-    const now = new Date();
-    
-    const bet: Bet = {
-      id,
-      ...betData,
-      status: "pending",
-      createdAt: now
-    };
-    
-    this.bets.set(id, bet);
-    
-    // Deduct the bet amount from user balance
-    const user = await this.getUser(bet.userId);
+    // Deduct user balance
+    const user = await this.getUser(betData.userId);
     if (user) {
+      if ((user.balance || 0) < betData.amount) {
+        throw new Error("Insufficient balance");
+      }
+      
       await this.updateUser(user.id, {
-        balance: user.balance - bet.amount
+        balance: (user.balance || 0) - betData.amount
+      });
+      
+      // Create transaction record for the bet
+      await this.createTransaction({
+        userId: user.id,
+        type: 'bet',
+        amount: betData.amount,
+        status: 'approved',
+        description: `Đặt cược ${betData.type} - ${betData.numbers.join(', ')}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     }
     
+    // Create bet record
+    const [bet] = await db.insert(bets).values(betData).returning();
     return bet;
   }
 
   async getUserBets(userId: number): Promise<Bet[]> {
-    return Array.from(this.bets.values())
-      .filter(bet => bet.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return db.select()
+      .from(bets)
+      .where(eq(bets.userId, userId))
+      .orderBy(desc(bets.createdAt));
   }
 
   async getBetsByDate(date: Date): Promise<Bet[]> {
-    const dateStart = new Date(date);
-    dateStart.setHours(0, 0, 0, 0);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     
-    const dateEnd = new Date(date);
-    dateEnd.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
     
-    return Array.from(this.bets.values())
-      .filter(bet => {
-        const betDate = new Date(bet.date);
-        return betDate >= dateStart && betDate <= dateEnd;
-      })
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    return db.select()
+      .from(bets)
+      .where(
+        and(
+          gte(bets.date, startOfDay.toISOString()),
+          lte(bets.date, endOfDay.toISOString())
+        )
+      );
   }
 
   async updateBet(id: number, betData: Partial<Bet>): Promise<Bet | undefined> {
-    const bet = this.bets.get(id);
-    if (!bet) return undefined;
-    
-    const updatedBet = { ...bet, ...betData };
-    this.bets.set(id, updatedBet);
-    
-    return updatedBet;
+    const [bet] = await db.update(bets)
+      .set(betData)
+      .where(eq(bets.id, id))
+      .returning();
+      
+    return bet;
   }
 
-  // Settings operations
   async getSetting(key: string): Promise<Setting | undefined> {
-    return this.settings.get(key);
-  }
-
-  async updateSetting(key: string, value: any, description?: string): Promise<Setting> {
-    const now = new Date();
-    const existingSetting = this.settings.get(key);
-    
-    const setting: Setting = {
-      key,
-      value,
-      updatedAt: now,
-      description: description || existingSetting?.description || ""
-    };
-    
-    this.settings.set(key, setting);
+    const [setting] = await db.select()
+      .from(settings)
+      .where(eq(settings.key, key));
+      
     return setting;
   }
 
-  async getAllSettings(): Promise<Setting[]> {
-    return Array.from(this.settings.values());
+  async updateSetting(key: string, value: any, description?: string): Promise<Setting> {
+    // Check if setting exists
+    const existingSetting = await this.getSetting(key);
+    
+    if (existingSetting) {
+      // Update existing setting
+      const [setting] = await db.update(settings)
+        .set({ 
+          value: JSON.stringify(value),
+          description: description || existingSetting.description, 
+          updatedAt: new Date().toISOString() 
+        })
+        .where(eq(settings.key, key))
+        .returning();
+        
+      return setting;
+    } else {
+      // Create new setting
+      const [setting] = await db.insert(settings)
+        .values({
+          key,
+          value: JSON.stringify(value),
+          description: description || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .returning();
+        
+      return setting;
+    }
   }
 
-  // Statistics operations
+  async getAllSettings(): Promise<Setting[]> {
+    return db.select().from(settings);
+  }
+
   async addNumberStat(statData: InsertNumberStat): Promise<NumberStat> {
-    const key = `${statData.number}-${statData.date.toISOString()}-${statData.region}`;
-    
-    const stat: NumberStat = {
-      ...statData
-    };
-    
-    this.numberStats.set(key, stat);
+    const [stat] = await db.insert(numberStats).values(statData).returning();
     return stat;
   }
 
   async getNumberStats(number: string, region: string, limit: number = 30): Promise<NumberStat[]> {
-    return Array.from(this.numberStats.values())
-      .filter(stat => stat.number === number && stat.region === region)
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, limit);
+    return db.select()
+      .from(numberStats)
+      .where(
+        and(
+          eq(numberStats.number, number),
+          eq(numberStats.region, region)
+        )
+      )
+      .orderBy(desc(numberStats.date))
+      .limit(limit);
   }
 
   async getMostFrequentNumbers(region: string, limit: number = 10): Promise<{number: string, occurrences: number}[]> {
-    const stats = Array.from(this.numberStats.values())
-      .filter(stat => stat.region === region);
+    const result = await db.execute(sql`
+      SELECT number, COUNT(*) as occurrences
+      FROM ${numberStats}
+      WHERE region = ${region} AND is_present = true
+      GROUP BY number
+      ORDER BY occurrences DESC
+      LIMIT ${limit}
+    `);
     
-    const numberCounts = new Map<string, number>();
-    
-    stats.forEach(stat => {
-      const current = numberCounts.get(stat.number) || 0;
-      numberCounts.set(stat.number, current + stat.occurrences);
-    });
-    
-    return Array.from(numberCounts.entries())
-      .map(([number, occurrences]) => ({ number, occurrences }))
-      .sort((a, b) => b.occurrences - a.occurrences)
-      .slice(0, limit);
+    return result.rows.map(row => ({
+      number: row.number as string,
+      occurrences: Number(row.occurrences)
+    }));
   }
 
   async getNumberAbsence(region: string, limit: number = 10): Promise<{number: string, days: number}[]> {
-    const mostRecentDate = new Date();
+    // Get current date
+    const today = new Date();
     
-    // For all possible 2-digit numbers (00-99)
-    const numberAbsences: {number: string, days: number}[] = [];
+    // Create a map to store all numbers and their latest appearance date
+    const allPossibleNumbers = Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0'));
+    const numberLastSeen = new Map<string, Date>();
     
-    for (let i = 0; i <= 99; i++) {
-      const numStr = i.toString().padStart(2, '0');
-      const stats = await this.getNumberStats(numStr, region);
-      
-      if (stats.length === 0) {
-        // Number has never appeared
-        numberAbsences.push({ number: numStr, days: 100 }); // Some high number
-      } else {
-        // Calculate days since last appearance
-        const lastDate = new Date(stats[0].date);
-        const diffTime = Math.abs(mostRecentDate.getTime() - lastDate.getTime());
-        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        numberAbsences.push({ number: numStr, days });
-      }
-    }
+    // Get the latest appearance date for each number that has appeared
+    const appearances = await db.select({
+      number: numberStats.number,
+      lastDate: sql`MAX(${numberStats.date})`
+    })
+    .from(numberStats)
+    .where(
+      and(
+        eq(numberStats.region, region),
+        eq(numberStats.isPresent, true)
+      )
+    )
+    .groupBy(numberStats.number);
     
-    return numberAbsences
+    // Initialize all numbers as absent for 100 days (a default high value)
+    const absenceDays = new Map<string, number>();
+    allPossibleNumbers.forEach(num => {
+      absenceDays.set(num, 100);
+    });
+    
+    // Calculate days absent for each number that has appeared
+    appearances.forEach(({ number, lastDate }) => {
+      const lastSeenDate = new Date(lastDate);
+      const daysSince = Math.floor((today.getTime() - lastSeenDate.getTime()) / (1000 * 60 * 60 * 24));
+      absenceDays.set(number, daysSince);
+    });
+    
+    // Convert to array, sort by days absent, and return top 'limit'
+    return Array.from(absenceDays.entries())
+      .map(([number, days]) => ({ number, days }))
       .sort((a, b) => b.days - a.days)
       .slice(0, limit);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
