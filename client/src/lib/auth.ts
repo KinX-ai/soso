@@ -28,7 +28,7 @@ interface AuthContextType {
 }
 
 interface RegisterData {
-  username: string;
+  username: string;  
   password: string;
   email: string;
   fullName: string;
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "Đăng nhập thất bại",
+        title: "Đăng nhập thất bại", 
         description: errorMessage,
         variant: "destructive",
       });
@@ -172,16 +172,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      isLoading,
-      isAdmin,
-      login,
-      register,
-      logout,
-      updateUserData
-    }}>
+    <AuthContext.Provider 
+      value={{
+        user,
+        token,
+        isLoading,
+        isAdmin,
+        login,
+        register,
+        logout,
+        updateUserData
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
