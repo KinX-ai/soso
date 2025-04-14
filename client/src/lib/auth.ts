@@ -1,3 +1,4 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -157,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
 
     toast({
-      title: "Đã đăng xuất",
+      title: "Đã đăng xuất", 
       description: "Bạn đã đăng xuất khỏi hệ thống",
     });
   };
@@ -170,19 +171,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = user?.role === "admin";
 
-  const value: AuthContextType = {
-    user,
-    token,
-    isLoading,
-    isAdmin,
-    login,
-    register,
-    logout,
-    updateUserData
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isLoading,
+      isAdmin,
+      login,
+      register,
+      logout,
+      updateUserData
+    }}>
       {children}
     </AuthContext.Provider>
   );
