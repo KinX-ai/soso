@@ -170,10 +170,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = user?.role === "admin";
 
-  const value = {
+  const value: AuthContextType = {
     user,
     token,
     isLoading,
+    isAdmin,
+    login,
+    register,
+    logout,
+    updateUserData
     isAdmin,
     login,
     register,
