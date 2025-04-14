@@ -1,3 +1,4 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Check if user is already logged in on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (storedToken) {
@@ -69,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await response.json();
         setUser(userData);
       } else {
-        // If token is invalid, clear it
         localStorage.removeItem("authToken");
         setToken(null);
       }
@@ -184,7 +183,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    AuthContext.Provider({ value, children })
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
