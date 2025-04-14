@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +13,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Helmet } from "react-helmet";
 
 export default function LotteryStatsPage() {
-  const [activeTab, setActiveTab] = useState("lo-gan");
   const [selectedRegion, setSelectedRegion] = useState("mienbac");
 
   return (
@@ -22,41 +21,43 @@ export default function LotteryStatsPage() {
         <title>Thống kê xổ số - Rồng Bạch Kim</title>
       </Helmet>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Thống kê xổ số</h1>
-        
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-            <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-              <TabsTrigger value="lo-gan">Lô gan</TabsTrigger>
-              <TabsTrigger value="lo-ve-nhieu">Lô về nhiều</TabsTrigger>
-              <TabsTrigger value="dau-duoi">Thống kê đầu đuôi</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
-          <Select defaultValue={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Chọn miền" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="mienbac">Miền Bắc</SelectItem>
-              <SelectItem value="mientrung">Miền Trung</SelectItem>
-              <SelectItem value="miennam">Miền Nam</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <TabsContent value="lo-gan" className={activeTab === "lo-gan" ? "block" : "hidden"}>
-          <LoGanStats region={selectedRegion} />
-        </TabsContent>
-        
-        <TabsContent value="lo-ve-nhieu" className={activeTab === "lo-ve-nhieu" ? "block" : "hidden"}>
-          <LoVeNhieuStats region={selectedRegion} />
-        </TabsContent>
-        
-        <TabsContent value="dau-duoi" className={activeTab === "dau-duoi" ? "block" : "hidden"}>
-          <DauDuoiStats region={selectedRegion} />
-        </TabsContent>
+
+        <Tabs defaultValue="mienbac">
+          <TabsList>
+            <TabsTrigger value="mienbac">Miền Bắc</TabsTrigger>
+            <TabsTrigger value="mientrung">Miền Trung</TabsTrigger>
+            <TabsTrigger value="miennam">Miền Nam</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="mienbac">
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold mb-4">Thống kê Miền Bắc</h2>
+              <LoGanStats region={selectedRegion} />
+              <LoVeNhieuStats region={selectedRegion} />
+              <DauDuoiStats region={selectedRegion} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="mientrung">
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold mb-4">Thống kê Miền Trung</h2>
+              <LoGanStats region={"mientrung"} />
+              <LoVeNhieuStats region={"mientrung"} />
+              <DauDuoiStats region={"mientrung"} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="miennam">
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold mb-4">Thống kê Miền Nam</h2>
+              <LoGanStats region={"miennam"} />
+              <LoVeNhieuStats region={"miennam"} />
+              <DauDuoiStats region={"miennam"} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
@@ -116,7 +117,7 @@ function LoGanStats({ region }: { region: string }) {
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Danh sách lô gan</CardTitle>
@@ -215,7 +216,7 @@ function LoVeNhieuStats({ region }: { region: string }) {
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Danh sách lô về nhiều</CardTitle>
@@ -282,10 +283,10 @@ function DauDuoiStats({ region }: { region: string }) {
   data.forEach((item: any) => {
     const dau = item.number.charAt(0);
     const duoi = item.number.charAt(1);
-    
+
     if (!dauStats[dau]) dauStats[dau] = 0;
     if (!duoiStats[duoi]) duoiStats[duoi] = 0;
-    
+
     dauStats[dau] += item.occurrences;
     duoiStats[duoi] += item.occurrences;
   });
@@ -330,7 +331,7 @@ function DauDuoiStats({ region }: { region: string }) {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Thống kê đuôi số</CardTitle>
@@ -358,7 +359,7 @@ function DauDuoiStats({ region }: { region: string }) {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -391,7 +392,7 @@ function DauDuoiStats({ region }: { region: string }) {
             </Table>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Bảng thống kê đuôi số</CardTitle>
