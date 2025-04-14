@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../lib/auth.tsx";
 import Layout from "@/components/Layout";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -222,8 +222,8 @@ export default function RegisterPage() {
           </CardContent>
           <CardFooter className="text-center text-sm">
             Đã có tài khoản?{" "}
-            <Link href="/dang-nhap">
-              <a className="text-[#0275d8] hover:underline">Đăng nhập ngay</a>
+            <Link href="/dang-nhap" className="text-[#0275d8] hover:underline">
+              Đăng nhập ngay
             </Link>
           </CardFooter>
         </Card>

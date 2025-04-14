@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../lib/auth.tsx";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -112,14 +112,14 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-sm">
-              <Link href="/quen-mat-khau">
-                <a className="text-[#0275d8] hover:underline">Quên mật khẩu?</a>
+              <Link href="/quen-mat-khau" className="text-[#0275d8] hover:underline">
+                Quên mật khẩu?
               </Link>
             </div>
             <div className="text-center text-sm">
               Chưa có tài khoản?{" "}
-              <Link href="/dang-ky">
-                <a className="text-[#0275d8] hover:underline">Đăng ký ngay</a>
+              <Link href="/dang-ky" className="text-[#0275d8] hover:underline">
+                Đăng ký ngay
               </Link>
             </div>
           </CardFooter>
