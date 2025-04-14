@@ -39,9 +39,10 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Kill any existing process on port 5000
+    // Kill any existing process on port 5000 
     await new Promise((resolve) => {
-      const cmd = require('child_process').exec('fuser -k 5000/tcp');
+      const { exec } = await import('child_process');
+      const cmd = exec('fuser -k 5000/tcp');
       cmd.on('exit', resolve);
     });
 
