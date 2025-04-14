@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -93,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("authToken", data.token);
       setToken(data.token);
       setUser(data.user);
-      
+
       toast({
         title: "Đăng nhập thành công",
         description: `Xin chào, ${data.user.fullName}`,
@@ -101,17 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Login error:", error);
       let errorMessage = "Đăng nhập thất bại";
-      
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: "Đăng nhập thất bại",
         description: errorMessage,
         variant: "destructive",
       });
-      
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -127,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("authToken", data.token);
       setToken(data.token);
       setUser(data.user);
-      
+
       toast({
         title: "Đăng ký thành công",
         description: "Tài khoản của bạn đã được tạo thành công",
@@ -135,17 +134,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Register error:", error);
       let errorMessage = "Đăng ký thất bại";
-      
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: "Đăng ký thất bại",
         description: errorMessage,
         variant: "destructive",
       });
-      
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -156,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("authToken");
     setToken(null);
     setUser(null);
-    
+
     toast({
       title: "Đã đăng xuất",
       description: "Bạn đã đăng xuất khỏi hệ thống",
