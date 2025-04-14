@@ -227,7 +227,108 @@ async function setupDefaultSettings() {
 /**
  * Hàm thiết lập và khởi tạo cơ sở dữ liệu
  */
-export async function setupSampleLotteryResults() {
+export async function setupDatabase() {
+  console.log('Bắt đầu thiết lập cơ sở dữ liệu...');
+  
+  try {
+    // Đẩy các thay đổi schema vào cơ sở dữ liệu
+    console.log('Đang cập nhật cấu trúc cơ sở dữ liệu...');
+    
+    // Tạo các bảng nếu chưa tồn tại
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        "fullName" TEXT NOT NULL,
+        "phoneNumber" TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'user',
+        balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+        "bankAccount" TEXT,
+        "bankName" TEXT,
+        "isActive" BOOLEAN NOT NULL DEFAULT true,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      
+      CREATE TABLE IF NOT EXISTS transactions (
+        id SERIAL PRIMARY KEY,
+        type TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        "userId" INTEGER NOT NULL REFERENCES users(id),
+        amount DOUBLE PRECISION NOT NULL,
+        method TEXT NOT NULL,
+        "bankAccount" TEXT,
+        "bankName" TEXT,
+        reference TEXT,
+        notes TEXT,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        "updatedAt" TIMESTAMP
+      );
+      
+      CREATE TABLE IF NOT EXISTS lottery_results (
+        id SERIAL PRIMARY KEY,
+        date TIMESTAMP NOT NULL,
+        region TEXT NOT NULL,
+        special TEXT NOT NULL,
+        first TEXT NOT NULL,
+        second TEXT[] NOT NULL,
+        third TEXT[] NOT NULL,
+        fourth TEXT[] NOT NULL,
+        fifth TEXT[] NOT NULL,
+        sixth TEXT[] NOT NULL,
+        seventh TEXT[] NOT NULL,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        UNIQUE(date, region)
+      );
+      
+      CREATE TABLE IF NOT EXISTS bets (
+        id SERIAL PRIMARY KEY,
+        date TIMESTAMP NOT NULL,
+        type TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        "userId" INTEGER NOT NULL REFERENCES users(id),
+        amount DOUBLE PRECISION NOT NULL,
+        numbers JSONB NOT NULL,
+        multiplier DOUBLE PRECISION NOT NULL DEFAULT 1,
+        payout DOUBLE PRECISION,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        "settledAt" TIMESTAMP
+      );
+      
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value JSONB NOT NULL,
+        description TEXT,
+        "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      
+      CREATE TABLE IF NOT EXISTS number_stats (
+        number TEXT NOT NULL,
+        date TIMESTAMP NOT NULL,
+        region TEXT NOT NULL,
+        occurrences INTEGER NOT NULL DEFAULT 1,
+        is_present BOOLEAN NOT NULL DEFAULT true,
+        PRIMARY KEY (number, date, region)
+      );
+    `);
+    
+    console.log('Cấu trúc cơ sở dữ liệu đã được cập nhật.');
+    
+    // Thiết lập dữ liệu ban đầu
+    await setupDefaultSettings();
+    await setupAdminAccount();
+    await setupNumberStats();
+    await setupSampleLotteryResults();
+    
+    console.log('Thiết lập cơ sở dữ liệu hoàn tất.');
+  } catch (error) {
+    console.error('Lỗi khi thiết lập cơ sở dữ liệu:', error);
+    throw error;
+  }
+}
+
+async function setupSampleLotteryResults() {
   console.log('Đang kiểm tra dữ liệu xổ số mẫu...');
   
   const existingResults = await db.select().from(lotteryResults).limit(1);
