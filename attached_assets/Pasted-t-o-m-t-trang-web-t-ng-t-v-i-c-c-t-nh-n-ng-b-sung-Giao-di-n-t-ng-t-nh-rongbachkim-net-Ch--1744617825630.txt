@@ -1,0 +1,57 @@
+tạo một trang web tương tự với các tính năng bổ sung:
+
+Giao diện tương tự như rongbachkim.net
+Chức năng chơi cá cược lô đề
+Hệ thống tài khoản quản trị
+Chức năng nạp/rút tiền cho người dùng
+Kế hoạch thực hiện
+1. Công nghệ sử dụng:
+Frontend: React với Vite, TailwindCSS cho styling
+Backend: Node.js với Express
+Database: MongoDB cho lưu trữ dữ liệu người dùng, lịch sử giao dịch và kết quả xổ số
+Authentication: JWT (JSON Web Tokens) cho xác thực và phân quyền
+2. Cấu trúc trang web:
+Trang chủ: Hiển thị kết quả xổ số mới nhất, thống kê và dự đoán (tương tự trang gốc)
+Đăng nhập/Đăng ký: Hệ thống tài khoản người dùng
+Trang quản trị: Dành cho admin quản lý người dùng, xem thống kê, cấu hình hệ thống
+Chơi lô đề: Nơi người dùng có thể đặt cược các con số
+Nạp/Rút tiền: Chức năng quản lý tài chính của người dùng
+Lịch sử giao dịch: Theo dõi các hoạt động chơi và giao dịch tài chính
+Thống kê & Soi cầu: Các công cụ dự đoán và phân tích kết quả
+3. Các tính năng chi tiết:
+Hệ thống người dùng:
+
+Đăng ký, đăng nhập, quên mật khẩu
+Quản lý thông tin cá nhân
+Xem lịch sử cược và giao dịch
+Hệ thống quản trị:
+
+Quản lý người dùng (khóa/mở tài khoản)
+Quản lý kết quả xổ số (thêm/sửa kết quả)
+Quản lý giao dịch nạp/rút
+Xem thống kê doanh thu, số người chơi
+Chơi lô đề:
+
+Đặt cược các con số (lô, đề, lô xiên, đề giải...)
+Hệ thống tự động kiểm tra kết quả và thanh toán
+Nạp/Rút tiền:
+
+Nạp tiền qua các phương thức thanh toán
+Rút tiền về tài khoản ngân hàng
+Lịch sử giao dịch
+1. Bổ sung tính năng lấy kết quả xổ số:
+Tạo API để crawl dữ liệu từ https://xosohanoi.net/xsmb-embed
+Lưu trữ kết quả vào database để sử dụng lại
+Tự động cập nhật kết quả hàng ngày
+Các kết quả xổ số sẽ được sử dụng để tính toán kết quả đặt cược
+2. Điều chỉnh phần chơi lô đề:
+Bỏ đề giải
+Thêm 3 càng (3 số cuối của giải đặc biệt)
+Các hình thức chơi chính: Lô, Đề, 3 càng, Lô xiên
+Kết quả được tính từ 18:15, sau 18:15 sẽ tính cho ngày hôm sau
+3. Bổ sung phần cấu hình nạp/rút trong hệ thống quản trị:
+Cấu hình phương thức thanh toán (ngân hàng, ví điện tử)
+Cấu hình tỷ lệ ăn/thua cho các hình thức chơi
+Cấu hình hạn mức nạp/rút và cược tối đa/tối thiểu
+Quản lý yêu cầu nạp/rút (duyệt/từ chối)
+Báo cáo thống kê về hoạt động nạp/rút
