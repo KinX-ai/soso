@@ -39,13 +39,6 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Kill any existing process on port 5000 
-    await new Promise((resolve) => {
-      const { exec } = await import('child_process');
-      const cmd = exec('fuser -k 5000/tcp');
-      cmd.on('exit', resolve);
-    });
-
     // Thiết lập và khởi tạo cơ sở dữ liệu
     await setupDatabase().catch(error => {
       if (error.code === '23505') { // Duplicate key error
@@ -55,11 +48,20 @@ app.use((req, res, next) => {
       }
     });
     log('Cơ sở dữ liệu đã được thiết lập thành công');
+    
+    const server = await registerRoutes(app);
+    
+    // ALWAYS serve the app on port 5000
+    server.listen({
+      port: 5000,
+      host: "0.0.0.0",
+    }, () => {
+      log(`Server started on port 5000`);
+    });
   } catch (error) {
-    console.error('Lỗi khi khởi tạo cơ sở dữ liệu:', error);
+    console.error('Lỗi khởi động server:', error);
+    process.exit(1);
   }
-  
-  const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
