@@ -17,8 +17,8 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminUsersPage from "@/pages/AdminUsersPage";
 import AdminTransactionsPage from "@/pages/AdminTransactionsPage";
 import AdminSettingsPage from "@/pages/AdminSettingsPage";
-import AdminLotteryPage from "@/pages/AdminLotteryPage";
-import { AuthProvider } from "@/lib/auth";
+import AdminLotteryPage from "./pages/AdminLotteryPage";
+import { AuthProvider } from "./lib/auth.tsx";
 
 function Router() {
   return (

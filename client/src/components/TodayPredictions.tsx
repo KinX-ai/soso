@@ -42,8 +42,8 @@ export default function TodayPredictions() {
             Theo thống kê, bộ số 28-67-90 có tần suất xuất hiện cao trong 10 ngày qua. Đặc biệt, cặp 28-67 về cùng nhau 3 lần trong 7 ngày.
           </p>
           <div className="flex justify-end">
-            <Link href="/du-doan-chi-tiet">
-              <a className="text-[#0275d8] hover:underline text-sm">Xem phân tích đầy đủ →</a>
+            <Link href="/du-doan-chi-tiet" className="text-[#0275d8] hover:underline text-sm">
+              Xem phân tích đầy đủ →
             </Link>
           </div>
         </div>

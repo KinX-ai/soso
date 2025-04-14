@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -184,7 +184,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    AuthContext.Provider({ value, children })
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
