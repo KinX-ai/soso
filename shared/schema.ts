@@ -115,7 +115,8 @@ export const numberStats = pgTable("number_stats", {
   number: text("number").notNull(),
   date: timestamp("date").notNull(),
   region: text("region").notNull(),
-  occurrences: integer("occurrences").notNull(),
+  occurrences: integer("occurrences").notNull().default(1),
+  isPresent: boolean("is_present").notNull().default(true),
 }, (table) => {
   return {
     pk: primaryKey({ columns: [table.number, table.date, table.region] }),

@@ -503,9 +503,9 @@ export class DatabaseStorage implements IStorage {
 
   async getMostFrequentNumbers(region: string, limit: number = 10): Promise<{number: string, occurrences: number}[]> {
     const result = await db.execute(sql`
-      SELECT number, COUNT(*) as occurrences
+      SELECT number, SUM(occurrences) as occurrences
       FROM ${numberStats}
-      WHERE region = ${region} AND is_present = true
+      WHERE region = ${region}
       GROUP BY number
       ORDER BY occurrences DESC
       LIMIT ${limit}
@@ -518,45 +518,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNumberAbsence(region: string, limit: number = 10): Promise<{number: string, days: number}[]> {
-    // Get current date
-    const today = new Date();
-    
-    // Create a map to store all numbers and their latest appearance date
-    const allPossibleNumbers = Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0'));
-    const numberLastSeen = new Map<string, Date>();
-    
-    // Get the latest appearance date for each number that has appeared
-    const appearances = await db.select({
-      number: numberStats.number,
-      lastDate: sql`MAX(${numberStats.date})`
-    })
-    .from(numberStats)
-    .where(
-      and(
-        eq(numberStats.region, region),
-        eq(numberStats.isPresent, true)
+    // Cách dễ dàng hơn để mô phỏng số liệu lô gan
+    const result = await db.execute(sql`
+      WITH recent_appearances AS (
+        SELECT 
+          number, 
+          MAX(date) as last_appear_date
+        FROM number_stats
+        WHERE region = ${region} 
+        GROUP BY number
       )
-    )
-    .groupBy(numberStats.number);
+      SELECT 
+        number, 
+        EXTRACT(DAY FROM NOW() - last_appear_date)::int as days
+      FROM recent_appearances
+      ORDER BY days DESC
+      LIMIT ${limit}
+    `);
     
-    // Initialize all numbers as absent for 100 days (a default high value)
-    const absenceDays = new Map<string, number>();
-    allPossibleNumbers.forEach(num => {
-      absenceDays.set(num, 100);
-    });
-    
-    // Calculate days absent for each number that has appeared
-    appearances.forEach(({ number, lastDate }) => {
-      const lastSeenDate = new Date(lastDate);
-      const daysSince = Math.floor((today.getTime() - lastSeenDate.getTime()) / (1000 * 60 * 60 * 24));
-      absenceDays.set(number, daysSince);
-    });
-    
-    // Convert to array, sort by days absent, and return top 'limit'
-    return Array.from(absenceDays.entries())
-      .map(([number, days]) => ({ number, days }))
-      .sort((a, b) => b.days - a.days)
-      .slice(0, limit);
+    return result.rows.map(row => ({
+      number: row.number as string,
+      days: Number(row.days)
+    }));
   }
 }
 
