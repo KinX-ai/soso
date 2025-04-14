@@ -97,10 +97,8 @@ function BettingOptionCard({
         <div><span className="font-medium">Tỷ lệ:</span> {payoutRate}</div>
         <div><span className="font-medium">Cược tối thiểu:</span> {minBet}</div>
       </div>
-      <Link href={href}>
-        <a className={`block ${primary ? 'bg-[#d9534f]' : 'bg-[#0275d8]'} text-white text-center py-2 rounded hover:bg-opacity-90 transition`}>
-          Chơi ngay
-        </a>
+      <Link href={href} className={`block ${primary ? 'bg-[#d9534f]' : 'bg-[#0275d8]'} text-white text-center py-2 rounded hover:bg-opacity-90 transition`}>
+        Chơi ngay
       </Link>
     </div>
   );

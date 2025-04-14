@@ -13,8 +13,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "../lib/auth.tsx";
 import { queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/lib/auth";
 import { vi } from "date-fns/locale";
 
 interface LotteryResult {
