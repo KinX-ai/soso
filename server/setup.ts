@@ -227,7 +227,40 @@ async function setupDefaultSettings() {
 /**
  * Hàm thiết lập và khởi tạo cơ sở dữ liệu
  */
-export async function setupDatabase() {
+export async function setupSampleLotteryResults() {
+  console.log('Đang kiểm tra dữ liệu xổ số mẫu...');
+  
+  const existingResults = await db.select().from(lotteryResults).limit(1);
+  
+  if (existingResults.length > 0) {
+    console.log('Dữ liệu xổ số mẫu đã tồn tại.');
+    return;
+  }
+
+  console.log('Đang tạo dữ liệu xổ số mẫu...');
+  
+  const today = new Date();
+  const regions = ['mienbac', 'mientrung', 'miennam'];
+
+  for (const region of regions) {
+    await db.insert(lotteryResults).values({
+      date: today,
+      region,
+      special: '12345',
+      first: '54321',
+      second: ['11111', '22222'],
+      third: ['33333', '44444'],
+      fourth: ['55555', '66666'],
+      fifth: ['77777', '88888'],
+      sixth: ['99999', '00000'],
+      seventh: ['12121', '23232']
+    });
+  }
+
+  console.log('Đã tạo dữ liệu xổ số mẫu thành công.');
+}
+
+async function setupDatabase() {
   console.log('Bắt đầu thiết lập cơ sở dữ liệu...');
   
   try {
@@ -319,6 +352,7 @@ export async function setupDatabase() {
     await setupDefaultSettings();
     await setupAdminAccount();
     await setupNumberStats();
+    await setupSampleLotteryResults();
     
     console.log('Thiết lập cơ sở dữ liệu hoàn tất.');
   } catch (error) {

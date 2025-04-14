@@ -166,7 +166,14 @@ export default function DepositPage() {
                             <p><span className="font-medium">Tên tài khoản:</span> CÔNG TY RỒNG BẠCH KIM</p>
                             <p><span className="font-medium">Nội dung:</span> {user.username} nap tien</p>
                           </div>
-                          <p>Sau khi chuyển khoản thành công, vui lòng điền thông tin bên dưới.</p>
+                          <div className="mt-4">
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Ngan hang: BIDV%0ASo tai khoan: 123456789%0ATen tai khoan: CONG TY RONG BACH KIM%0ANoi dung: ${user.username} nap tien`}
+                              alt="QR Code"
+                              className="mx-auto"
+                            />
+                          </div>
+                          <p className="mt-4">Sau khi chuyển khoản thành công, vui lòng điền thông tin bên dưới.</p>
                         </AlertDescription>
                       </Alert>
                     </div>
