@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../lib/auth.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -314,7 +314,7 @@ export default function WithdrawPage() {
                       />
                     )}
                     
-                    <Alert variant="warning" className="bg-amber-50 border-amber-200 text-amber-800">
+                    <Alert className="bg-amber-50 border-amber-200 text-amber-800">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Lưu ý quan trọng</AlertTitle>
                       <AlertDescription>

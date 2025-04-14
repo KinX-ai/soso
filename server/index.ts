@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupDatabase } from "./setup";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,17 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  try {
+    // Thiết lập và khởi tạo cơ sở dữ liệu
+    await setupDatabase().catch(error => {
+      console.error('Lỗi khi thiết lập cơ sở dữ liệu:', error);
+    });
+    log('Cơ sở dữ liệu đã được thiết lập thành công');
+  } catch (error) {
+    console.error('Lỗi khi khởi tạo cơ sở dữ liệu:', error);
+    // Tiếp tục khởi động server ngay cả khi có lỗi
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
