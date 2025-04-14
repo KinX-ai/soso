@@ -7,12 +7,24 @@ import { crawlLotteryResults } from "./utils/crawlLottery";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { authMiddleware, adminMiddleware } from "./middleware/auth";
+import path from "path";
+import fs from "fs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "rongbachkim-secret-key";
 const SALT_ROUNDS = 10;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // Phục vụ file hướng dẫn thiết lập trực tiếp
+  app.get("/setup-guide", (req, res) => {
+    const setupGuidePath = path.resolve(process.cwd(), "setup-guide.html");
+    if (fs.existsSync(setupGuidePath)) {
+      res.sendFile(setupGuidePath);
+    } else {
+      res.status(404).send("Trang hướng dẫn không tồn tại");
+    }
+  });
 
   // Utility function to handle errors
   const handleError = (res: Response, error: unknown) => {

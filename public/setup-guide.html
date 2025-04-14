@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Thiết Lập Server - Rồng Bạch Kim</title>
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --primary-dark: #9a0007;
+            --primary-light: #ff6659;
+            --secondary-color: #ffc107;
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --card-bg: #fff;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        h2 .icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        h3 {
+            color: var(--primary-dark);
+            margin: 15px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            color: #d32f2f;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .info-card {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .warning-card {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .success-card {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .qr-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .qr-card {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+
+        .qr-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+
+        .qr-content {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .qr-image {
+            max-width: 200px;
+            height: auto;
+            margin: 0 auto 15px;
+        }
+
+        .qr-details {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .qr-details p {
+            margin-bottom: 5px;
+        }
+
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .qr-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hướng Dẫn Thiết Lập Server - Rồng Bạch Kim</h1>
+            <p class="subtitle">Tài liệu hướng dẫn thiết lập và cấu hình khi đổi server</p>
+        </header>
+
+        <div class="section">
+            <h2><span class="icon">🔑</span> Thông Tin Tài Khoản Admin</h2>
+            <div class="info-card">
+                <p><strong>Tên đăng nhập:</strong> admin</p>
+                <p><strong>Mật khẩu mặc định:</strong> admin123</p>
+                <p><strong>Email:</strong> admin@example.com</p>
+                <p><strong>Số dư ban đầu:</strong> 1,000,000 VND</p>
+            </div>
+            <p>Lưu ý: Vì lý do bảo mật, vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu.</p>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🚀</span> Hướng Dẫn Khởi Tạo Server</h2>
+            
+            <h3>1. Thiết lập cơ sở dữ liệu</h3>
+            <p>Khi chuyển sang server mới, cần thiết lập cơ sở dữ liệu bằng script đã chuẩn bị sẵn:</p>
+            <pre class="code-block">chmod +x setup-database.sh
+./setup-database.sh</pre>
+            <p>Script này sẽ tự động thực hiện các bước sau:</p>
+            <ul>
+                <li>Tạo bảng dữ liệu nếu chưa tồn tại</li>
+                <li>Tạo tài khoản admin mặc định</li>
+                <li>Thiết lập các cài đặt hệ thống mặc định</li>
+                <li>Tạo dữ liệu mẫu thống kê số xổ số</li>
+            </ul>
+
+            <div class="warning-card">
+                <p><strong>Lưu ý:</strong> Khi khởi động, server sẽ tự động chạy setup database nếu cần thiết. Script trên chỉ sử dụng trong trường hợp bạn muốn thiết lập lại cơ sở dữ liệu.</p>
+            </div>
+
+            <h3>2. Khởi động server</h3>
+            <p>Để khởi động server, sử dụng lệnh:</p>
+            <pre class="code-block">npm run dev</pre>
+            <p>Hoặc trong môi trường production:</p>
+            <pre class="code-block">npm run build
+npm start</pre>
+
+            <h3>3. Kết nối cơ sở dữ liệu</h3>
+            <p>Hệ thống sử dụng biến môi trường <code>DATABASE_URL</code> để kết nối với PostgreSQL. Đảm bảo biến này được thiết lập đúng:</p>
+            <pre class="code-block">export DATABASE_URL="postgresql://username:password@host:port/database"</pre>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🔄</span> Di Chuyển Dữ Liệu</h2>
+            <p>Nếu muốn di chuyển dữ liệu từ server cũ sang server mới, thực hiện các bước sau:</p>
+            
+            <h3>1. Xuất dữ liệu từ server cũ</h3>
+            <pre class="code-block">pg_dump -h hostname -U username -d database_name -F c > backup.dump</pre>
+            
+            <h3>2. Nhập vào server mới</h3>
+            <pre class="code-block">pg_restore -h new_hostname -U new_username -d new_database -c -v backup.dump</pre>
+
+            <div class="success-card">
+                <p><strong>Mẹo:</strong> Nếu chỉ cần chuyển dữ liệu người dùng và lịch sử giao dịch, có thể sử dụng các lệnh SQL chuyên biệt để tránh xung đột với dữ liệu hiện tại.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">📱</span> Mã QR Chuyển Khoản</h2>
+            <p>Dưới đây là mã QR chuyển khoản được tạo bằng <a href="https://vietqr.net" target="_blank">VietQR.net</a> cho các tài khoản nhận tiền của hệ thống:</p>
+
+            <div class="qr-section">
+                <div class="qr-card">
+                    <div class="qr-header">BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam</div>
+                    <div class="qr-content">
+                        <img class="qr-image" src="https://img.vietqr.io/image/BIDV-123456789-compact.png" alt="QR BIDV">
+                        <div class="qr-details">
+                            <p><strong>Chủ tài khoản:</strong> CÔNG TY RỒNG BẠCH KIM</p>
+                            <p><strong>Số tài khoản:</strong> 123456789 <button class="copy-btn" onclick="copyToClipboard('123456789')">Sao chép</button></p>
+                            <p><strong>Nội dung CK:</strong> <span id="transfer-content">username nap tien</span> <button class="copy-btn" onclick="copyToClipboard(document.getElementById('transfer-content').innerText)">Sao chép</button></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qr-card">
+                    <div class="qr-header">Vietcombank - Ngân hàng TMCP Ngoại thương Việt Nam</div>
+                    <div class="qr-content">
+                        <img class="qr-image" src="https://img.vietqr.io/image/VCB-987654321-compact.png" alt="QR Vietcombank">
+                        <div class="qr-details">
+                            <p><strong>Chủ tài khoản:</strong> CÔNG TY RỒNG BẠCH KIM</p>
+                            <p><strong>Số tài khoản:</strong> 987654321 <button class="copy-btn" onclick="copyToClipboard('987654321')">Sao chép</button></p>
+                            <p><strong>Nội dung CK:</strong> <span id="transfer-content2">username nap tien</span> <button class="copy-btn" onclick="copyToClipboard(document.getElementById('transfer-content2').innerText)">Sao chép</button></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <p><strong>Hướng dẫn:</strong> Thay "username" trong nội dung chuyển khoản bằng tên đăng nhập của người dùng để dễ dàng xác nhận giao dịch.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">⚙️</span> Cấu Hình Hệ Thống</h2>
+            <p>Các thiết lập mặc định của hệ thống được lưu trong bảng <code>settings</code> trong cơ sở dữ liệu:</p>
+            
+            <table>
+                <tr>
+                    <th>Key</th>
+                    <th>Mô tả</th>
+                    <th>Giá trị mặc định</th>
+                </tr>
+                <tr>
+                    <td>min_bet_amount</td>
+                    <td>Số tiền cược tối thiểu (VND)</td>
+                    <td>10,000</td>
+                </tr>
+                <tr>
+                    <td>min_deposit_amount</td>
+                    <td>Số tiền nạp tối thiểu (VND)</td>
+                    <td>50,000</td>
+                </tr>
+                <tr>
+                    <td>min_withdraw_amount</td>
+                    <td>Số tiền rút tối thiểu (VND)</td>
+                    <td>100,000</td>
+                </tr>
+                <tr>
+                    <td>betting_rates</td>
+                    <td>Tỷ lệ trả thưởng các hình thức cược</td>
+                    <td>
+                        Lô: 1 ăn 80<br>
+                        Đề: 1 ăn 80<br>
+                        3 càng: 1 ăn 700<br>
+                        Lô xiên 2: 1 ăn 15<br>
+                        Lô xiên 3: 1 ăn 50<br>
+                        Lô xiên 4: 1 ăn 150
+                    </td>
+                </tr>
+                <tr>
+                    <td>bank_accounts</td>
+                    <td>Danh sách tài khoản ngân hàng nhận tiền</td>
+                    <td>BIDV: 123456789<br>Vietcombank: 987654321</td>
+                </tr>
+                <tr>
+                    <td>e_wallets</td>
+                    <td>Danh sách ví điện tử nhận tiền</td>
+                    <td>MoMo: 0987654321<br>ZaloPay: 0123456789</td>
+                </tr>
+            </table>
+
+            <div class="warning-card">
+                <p><strong>Quan trọng:</strong> Để thay đổi các thiết lập này, sử dụng giao diện admin hoặc truy vấn SQL trực tiếp. Không nên sửa trực tiếp code nguồn.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            // Show feedback
+            alert('Đã sao chép: ' + text);
+        }
+    </script>
+</body>
+</html>
