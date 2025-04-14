@@ -73,8 +73,8 @@ export default function StatisticsBox() {
           </table>
         </div>
         <div className="text-right">
-          <Link href="/thong-ke-lo-gan">
-            <a className="text-[#0275d8] hover:underline text-sm">Xem thêm →</a>
+          <Link href="/thong-ke-lo-gan" className="text-[#0275d8] hover:underline text-sm">
+            Xem thêm →
           </Link>
         </div>
       </CardContent>
