@@ -32,10 +32,10 @@ export default function HomePage() {
         <meta name="description" content="Rồng Bạch Kim - Trang web dự đoán xổ số, soi cầu lô đề và cung cấp thống kê xổ số miền Bắc hàng ngày." />
       </Helmet>
 
-      {/* Hero section with latest results and quick stats */}
+      {/* Hero section with latest results and stats */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
         <div className="flex flex-col md:flex-row justify-between gap-6">
-          {/* Latest Results and Head-Tail Table Section */}
+          {/* Latest Results Section */}
           <div className="w-full md:w-8/12">
             <div className="mb-4">
               <Tabs defaultValue="mienbac" className="w-full">
@@ -45,19 +45,13 @@ export default function HomePage() {
                   <TabsTrigger value="miennam" className="rounded">Miền Nam</TabsTrigger>
                 </TabsList>
                 <TabsContent value="mienbac" className="mt-4">
-                  <HeadTailTable 
-                    title={formatDate(date, "EEEE - dd/MM/yyyy", { locale: vi })} 
-                  />
+                  <LotteryResult region="mienbac" useExternalApi={false} />
                 </TabsContent>
                 <TabsContent value="mientrung" className="mt-4">
-                  <HeadTailTable 
-                    title={formatDate(date, "EEEE - dd/MM/yyyy", { locale: vi })} 
-                  />
+                  <LotteryResult region="mientrung" useExternalApi={true} />
                 </TabsContent>
                 <TabsContent value="miennam" className="mt-4">
-                  <HeadTailTable 
-                    title={formatDate(date, "EEEE - dd/MM/yyyy", { locale: vi })} 
-                  />
+                  <LotteryResult region="miennam" useExternalApi={true} />
                 </TabsContent>
               </Tabs>
             </div>
@@ -71,8 +65,13 @@ export default function HomePage() {
             </div>
           </div>
           
-          {/* Quick Stats Card */}
+          {/* Đầu Đuôi và Quick Stats */}
           <div className="w-full md:w-4/12">
+            <div className="mb-4">
+              <HeadTailTable 
+                title={formatDate(date, "EEEE - dd/MM/yyyy", { locale: vi })} 
+              />
+            </div>
             <QuickStats />
           </div>
         </div>

@@ -59,11 +59,11 @@ function ExternalLotteryResult({ region }: { region: string }) {
         <CardTitle className="flex justify-between items-center text-base md:text-lg">
           <span>KẾT QUẢ XỔ SỐ {getRegionTitle()}</span>
           <div className="text-xs md:text-sm font-normal bg-white text-[#d9534f] rounded px-2 py-1">
-            Dữ liệu từ xosohanoi.net
+            {format(new Date(), "dd/MM/yyyy", { locale: vi })}
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 relative overflow-hidden">
+      <CardContent className="p-0 relative overflow-hidden h-[420px]">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#d9534f]"></div>
@@ -73,11 +73,15 @@ function ExternalLotteryResult({ region }: { region: string }) {
           ref={iframeRef}
           src={apiUrl}
           className="w-full border-0"
-          style={{ height: "500px", minHeight: "500px", overflow: "hidden" }}
+          style={{ height: "420px", overflow: "hidden" }}
           onLoad={handleIframeLoad}
           title={`Xổ số ${getRegionTitle()}`}
+          scrolling="no"
         ></iframe>
       </CardContent>
+      <div className="px-4 py-2 bg-gray-100 text-center text-xs">
+        Dữ liệu cung cấp bởi xosohanoi.net
+      </div>
     </Card>
   );
 }
@@ -286,13 +290,13 @@ export function LotteryResultTabs() {
         <TabsTrigger value="miennam" className="rounded">Miền Nam</TabsTrigger>
       </TabsList>
       <TabsContent value="mienbac" className="mt-4">
-        <ExternalLotteryResult region="mienbac" />
+        <LotteryResult region="mienbac" useExternalApi={false} />
       </TabsContent>
       <TabsContent value="mientrung" className="mt-4">
-        <ExternalLotteryResult region="mientrung" />
+        <LotteryResult region="mientrung" useExternalApi={true} />
       </TabsContent>
       <TabsContent value="miennam" className="mt-4">
-        <ExternalLotteryResult region="miennam" />
+        <LotteryResult region="miennam" useExternalApi={true} />
       </TabsContent>
     </Tabs>
   );

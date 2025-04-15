@@ -39,90 +39,52 @@ const defaultData: HeadTailData = {
 
 export default function HeadTailTable({ title = "Thứ Hai - 14/04/2025", data = defaultData }: HeadTailTableProps) {
   return (
-    <div className="flex flex-col text-sm">
-      <div className="flex w-full">
-        <div className="w-1/3 bg-[#cce5ff] p-1 font-bold text-center border border-gray-300">
-          {title}
+    <Card>
+      <CardHeader className="bg-[#0275d8] text-white font-condensed font-bold text-lg py-2 px-4 rounded-t-lg">
+        <CardTitle>BẢNG ĐẦU ĐUÔI - {title}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-2">
+        <div className="flex flex-col text-sm">
+          <div className="flex w-full">
+            <div className="w-1/2 bg-[#ffdfba] p-1 font-bold text-center border border-gray-300">
+              Đầu
+            </div>
+            <div className="w-1/2 bg-[#ffe6f2] p-1 font-bold text-center border border-gray-300">
+              Đuôi
+            </div>
+          </div>
+          
+          <div className="flex w-full">
+            {/* Bảng Đầu */}
+            <div className="w-1/2">
+              <table className="w-full border-collapse text-xs md:text-sm">
+                <tbody>
+                  {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
+                    <tr key={`head-${digit}`} className="border border-gray-300">
+                      <td className="py-1 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
+                      <td className="py-1 px-1 text-center">{data.head[digit]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Bảng Đuôi */}
+            <div className="w-1/2">
+              <table className="w-full border-collapse text-xs md:text-sm">
+                <tbody>
+                  {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
+                    <tr key={`tail-${digit}`} className="border border-gray-300">
+                      <td className="py-1 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
+                      <td className="py-1 px-1 text-center">{data.tail[digit]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div className="w-1/3 bg-[#ffdfba] p-1 font-bold text-center border border-gray-300">
-          Đầu
-        </div>
-        <div className="w-1/3 bg-[#ffe6f2] p-1 font-bold text-center border border-gray-300">
-          Đuôi
-        </div>
-      </div>
-      
-      <div className="flex w-full">
-        <div className="w-1/3">
-          <table className="w-full border-collapse text-xs md:text-sm">
-            <tbody>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 w-1/4 font-bold text-center text-blue-800 border-r border-gray-300">ĐB</td>
-                <td className="py-1 px-1 text-center text-red-600 font-bold">46935</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 font-bold text-center text-blue-800 border-r border-gray-300">Nhất</td>
-                <td className="py-1 px-1 text-center">76071</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 font-bold text-center text-blue-800 border-r border-gray-300" rowSpan={2}>Nhì</td>
-                <td className="py-1 px-1 text-center">08866</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">77399</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 font-bold text-center text-blue-800 border-r border-gray-300" rowSpan={6}>Ba</td>
-                <td className="py-1 px-1 text-center">28854</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">16105</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">81240</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">42422</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">16899</td>
-              </tr>
-              <tr className="border border-gray-300">
-                <td className="py-1 px-1 text-center">38673</td>
-              </tr>
-              {/* Thêm các giải còn lại... */}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Bảng Đầu */}
-        <div className="w-1/3">
-          <table className="w-full border-collapse text-xs md:text-sm">
-            <tbody>
-              {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
-                <tr key={`head-${digit}`} className="border border-gray-300">
-                  <td className="py-1 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
-                  <td className="py-1 px-1 text-center">{data.head[digit]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Bảng Đuôi */}
-        <div className="w-1/3">
-          <table className="w-full border-collapse text-xs md:text-sm">
-            <tbody>
-              {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
-                <tr key={`tail-${digit}`} className="border border-gray-300">
-                  <td className="py-1 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
-                  <td className="py-1 px-1 text-center">{data.tail[digit]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

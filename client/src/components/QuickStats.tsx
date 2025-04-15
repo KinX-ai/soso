@@ -77,23 +77,15 @@ export default function QuickStats() {
         <CardTitle>THỐNG KÊ NHANH</CardTitle>
       </CardHeader>
       
-      <CardContent className="p-4">
-        <div className="grid grid-cols-2 gap-4 mb-4">
+      <CardContent className="p-3">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <StatCard
-            title="Đầu về nhiều nhất"
-            value={frequentLoading ? <Skeleton className="h-6 w-20" /> : getFrequentDigits("head")}
-          />
-          <StatCard
-            title="Đuôi về nhiều nhất"
-            value={frequentLoading ? <Skeleton className="h-6 w-20" /> : getFrequentDigits("tail")}
+            title="Cặp lô về nhiều"
+            value={frequentLoading ? <Skeleton className="h-6 w-20" /> : getFrequentPairs()}
           />
           <StatCard
             title="Lô gan"
             value={absenceLoading ? <Skeleton className="h-6 w-20" /> : getAbsentNumbers()}
-          />
-          <StatCard
-            title="Cặp lô về nhiều"
-            value={frequentLoading ? <Skeleton className="h-6 w-20" /> : getFrequentPairs()}
           />
         </div>
         
