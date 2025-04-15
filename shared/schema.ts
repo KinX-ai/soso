@@ -115,7 +115,7 @@ export const numberStats = pgTable("number_stats", {
   date: timestamp("date").notNull(),
   region: text("region").notNull(),
   occurrences: integer("occurrences").notNull().default(1),
-  isPresent: boolean("is_present").notNull().default(true), // Trường này trong DB là is_present
+  isPresent: boolean("isPresent").notNull().default(true), // Trường này là isPresent
 }, (table) => {
   return {
     pk: primaryKey({ columns: [table.number, table.date, table.region] }),

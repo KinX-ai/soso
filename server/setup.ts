@@ -53,7 +53,7 @@ async function setupNumberStats() {
       date: today,
       region: 'mienbac',
       occurrences: numData.occurrences,
-      "isPresent": true
+      isPresent: true
     });
   }
 
