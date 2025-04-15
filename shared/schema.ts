@@ -63,13 +63,12 @@ export const lotteryResults = pgTable("lottery_results", {
   sixth: jsonb("sixth").notNull(), // Sixth prize (Array)
   seventh: jsonb("seventh").notNull(), // Seventh prize (Array)
   createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt"),
+  // Cột updatedAt đã bị loại bỏ do không tồn tại trong database
 });
 
 export const insertLotteryResultSchema = createInsertSchema(lotteryResults).omit({
   id: true,
   createdAt: true,
-  updatedAt: true,
 });
 
 // Bet types
@@ -102,7 +101,7 @@ export const insertBetSchema = createInsertSchema(bets).omit({
 export const settings = pgTable("settings", {
   key: text("key").notNull().primaryKey(),
   value: jsonb("value").notNull(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   description: text("description"),
 });
 
@@ -116,7 +115,7 @@ export const numberStats = pgTable("number_stats", {
   date: timestamp("date").notNull(),
   region: text("region").notNull(),
   occurrences: integer("occurrences").notNull().default(1),
-  isPresent: boolean("is_present").notNull().default(true),
+  isPresent: boolean("is_present").notNull().default(true), // Trường này trong DB là is_present
 }, (table) => {
   return {
     pk: primaryKey({ columns: [table.number, table.date, table.region] }),
