@@ -111,16 +111,10 @@ async function setupAdminAccount() {
   const hashedPassword = await bcrypt.hash('admin123', 10);
 
   // Tạo tài khoản admin mặc định
-  await db.insert(users).values({
-    username: 'admin',
-    email: 'admin@example.com',
-    password: hashedPassword,
-    fullName: 'Quản trị viên',
-    phoneNumber: '0987654321',
-    role: 'admin',
-    isActive: true,
-    balance: 1000000 // Số dư mặc định: 1 triệu VND
-  });
+  await db.execute(sql`
+    INSERT INTO users (username, email, password, full_name, phone_number, role, is_active, balance)
+    VALUES ('admin', 'admin@example.com', ${hashedPassword}, 'Quan tri vien', '0987654321', 'admin', true, 1000000)
+  `);
 
   console.log('Đã tạo tài khoản admin mặc định thành công.');
   console.log('Tên đăng nhập: admin');
@@ -150,34 +144,34 @@ async function setupDefaultSettings() {
     {
       key: 'min_bet_amount',
       value: 10000,
-      description: 'Số tiền cược tối thiểu (VND)'
+      description: 'So tien cuoc toi thieu (VND)'
     },
     {
       key: 'min_deposit_amount', 
       value: 50000,
-      description: 'Số tiền nạp tối thiểu (VND)'
+      description: 'So tien nap toi thieu (VND)'
     },
     {
       key: 'min_withdraw_amount',
       value: 100000,
-      description: 'Số tiền rút tối thiểu (VND)'
+      description: 'So tien rut toi thieu (VND)'
     },
     {
       key: 'site_name',
-      value: 'Rồng Bạch Kim',
-      description: 'Tên trang web'
+      value: 'Rong Bach Kim',
+      description: 'Ten trang web'
     },
     {
       key: 'betting_rates',
       value: JSON.stringify({
-        lo: 80,     // Lô: 1 ăn 80
-        de: 80,     // Đề: 1 ăn 80
-        '3cang': 700,  // 3 càng: 1 ăn 700
-        'lo_xien_2': 15,  // Lô xiên 2: 1 ăn 15
-        'lo_xien_3': 50,  // Lô xiên 3: 1 ăn 50
-        'lo_xien_4': 150  // Lô xiên 4: 1 ăn 150
+        lo: 80,     // Lo: 1 an 80
+        de: 80,     // De: 1 an 80
+        '3cang': 700,  // 3 cang: 1 an 700
+        'lo_xien_2': 15,  // Lo xien 2: 1 an 15
+        'lo_xien_3': 50,  // Lo xien 3: 1 an 50
+        'lo_xien_4': 150  // Lo xien 4: 1 an 150
       }),
-      description: 'Tỷ lệ trả thưởng'
+      description: 'Ty le tra thuong'
     },
     {
       key: 'bank_accounts',
@@ -185,15 +179,15 @@ async function setupDefaultSettings() {
         {
           bank_name: 'BIDV',
           account_number: '123456789',
-          account_name: 'CÔNG TY RỒNG BẠCH KIM'
+          account_name: 'CONG TY RONG BACH KIM'
         },
         {
           bank_name: 'Vietcombank',
           account_number: '987654321',
-          account_name: 'CÔNG TY RỒNG BẠCH KIM'
+          account_name: 'CONG TY RONG BACH KIM'
         }
       ]),
-      description: 'Danh sách tài khoản ngân hàng nhận nạp tiền'
+      description: 'Danh sach tai khoan ngan hang nhan nap tien'
     },
     {
       key: 'e_wallets',
@@ -201,25 +195,24 @@ async function setupDefaultSettings() {
         {
           name: 'MoMo',
           phone: '0987654321',
-          owner: 'RỒNG BẠCH KIM'
+          owner: 'RONG BACH KIM'
         },
         {
           name: 'ZaloPay',
           phone: '0123456789',
-          owner: 'RỒNG BẠCH KIM'
+          owner: 'RONG BACH KIM'
         }
       ]),
-      description: 'Danh sách ví điện tử nhận nạp tiền'
+      description: 'Danh sach vi dien tu nhan nap tien'
     }
   ];
 
   // Thêm từng thiết lập
   for (const setting of defaultSettings) {
-    await db.insert(settings).values({
-      key: setting.key,
-      value: setting.value,
-      description: setting.description
-    });
+    await db.execute(sql`
+      INSERT INTO settings (key, value, description)
+      VALUES (${setting.key}, ${setting.value}, ${setting.description})
+    `);
   }
 
   console.log('Đã tạo thiết lập hệ thống mặc định thành công.');
@@ -275,29 +268,29 @@ export async function setupDatabase() {
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        "fullName" TEXT NOT NULL,
-        "phoneNumber" TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        phone_number TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user',
         balance DOUBLE PRECISION NOT NULL DEFAULT 0,
-        "bankAccount" TEXT,
-        "bankName" TEXT,
-        "isActive" BOOLEAN NOT NULL DEFAULT true,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+        bank_account TEXT,
+        bank_name TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
         type TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
-        "userId" INTEGER NOT NULL REFERENCES users(id),
+        user_id INTEGER NOT NULL REFERENCES users(id),
         amount DOUBLE PRECISION NOT NULL,
         method TEXT NOT NULL,
-        "bankAccount" TEXT,
-        "bankName" TEXT,
+        bank_account TEXT,
+        bank_name TEXT,
         reference TEXT,
         notes TEXT,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
-        "updatedAt" TIMESTAMP
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS lottery_results (
@@ -312,7 +305,7 @@ export async function setupDatabase() {
         fifth TEXT[] NOT NULL,
         sixth TEXT[] NOT NULL,
         seventh TEXT[] NOT NULL,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         UNIQUE(date, region)
       );
 
@@ -321,20 +314,20 @@ export async function setupDatabase() {
         date TIMESTAMP NOT NULL,
         type TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
-        "userId" INTEGER NOT NULL REFERENCES users(id),
+        user_id INTEGER NOT NULL REFERENCES users(id),
         amount DOUBLE PRECISION NOT NULL,
         numbers JSONB NOT NULL,
         multiplier DOUBLE PRECISION NOT NULL DEFAULT 1,
         payout DOUBLE PRECISION,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
-        "settledAt" TIMESTAMP
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        settled_at TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value JSONB NOT NULL,
         description TEXT,
-        "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS number_stats (

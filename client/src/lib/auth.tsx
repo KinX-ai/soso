@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -172,16 +171,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      isLoading,
-      isAdmin,
-      login,
-      register,
-      logout,
-      updateUserData
-    }}>
+    <AuthContext.Provider 
+      value={{
+        user,
+        token,
+        isLoading,
+        isAdmin,
+        login,
+        register,
+        logout,
+        updateUserData
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

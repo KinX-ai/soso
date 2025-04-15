@@ -368,13 +368,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLatestLotteryResult(region: string): Promise<LotteryResult | undefined> {
-    const [result] = await db.select()
-      .from(lotteryResults)
-      .where(eq(lotteryResults.region, region))
-      .orderBy(desc(lotteryResults.date))
-      .limit(1);
+    const result = await db.execute(sql`
+      SELECT * FROM lottery_results
+      WHERE region = ${region}
+      ORDER BY date DESC
+      LIMIT 1
+    `);
       
-    return result;
+    return result.rows[0] as LotteryResult;
   }
 
   async createBet(betData: InsertBet): Promise<Bet> {
@@ -453,29 +454,23 @@ export class DatabaseStorage implements IStorage {
     
     if (existingSetting) {
       // Update existing setting
-      const [setting] = await db.update(settings)
-        .set({ 
-          value: JSON.stringify(value),
-          description: description || existingSetting.description, 
-          updatedAt: new Date().toISOString() 
-        })
-        .where(eq(settings.key, key))
-        .returning();
-        
-      return setting;
+      await db.execute(sql`
+        UPDATE settings
+        SET value = ${JSON.stringify(value)},
+            description = ${description || existingSetting.description},
+            updated_at = NOW()
+        WHERE key = ${key}
+      `);
+      
+      return await this.getSetting(key);
     } else {
       // Create new setting
-      const [setting] = await db.insert(settings)
-        .values({
-          key,
-          value: JSON.stringify(value),
-          description: description || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        })
-        .returning();
-        
-      return setting;
+      await db.execute(sql`
+        INSERT INTO settings (key, value, description, updated_at)
+        VALUES (${key}, ${JSON.stringify(value)}, ${description || ''}, NOW())
+      `);
+      
+      return await this.getSetting(key);
     }
   }
 
