@@ -239,12 +239,12 @@ async function setupSampleLotteryResults() {
       region,
       special: '12345',
       first: '54321',
-      second: ['11111', '22222'],
-      third: ['33333', '44444'],
-      fourth: ['55555', '66666'],
-      fifth: ['77777', '88888'],
-      sixth: ['99999', '00000'],
-      seventh: ['12121', '23232']
+      second: JSON.stringify(['11111', '22222']),
+      third: JSON.stringify(['33333', '44444']),
+      fourth: JSON.stringify(['55555', '66666']),
+      fifth: JSON.stringify(['77777', '88888']),
+      sixth: JSON.stringify(['99999', '00000']),
+      seventh: JSON.stringify(['12121', '23232'])
     });
   }
 

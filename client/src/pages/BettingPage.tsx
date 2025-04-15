@@ -255,7 +255,16 @@ function BettingTabContent({
     setBetAmount(numAmount);
     
     // Get rate for bet type
-    const rates = settings.bettingRates;
+    let rates;
+    try {
+      rates = typeof settings.bettingRates === 'string' 
+        ? JSON.parse(settings.bettingRates) 
+        : settings.bettingRates;
+    } catch (error) {
+      console.error("Error parsing betting rates:", error);
+      rates = {};
+    }
+    
     const rate = rates[betType === "3cang" ? "3cang" : betType];
     
     if (rate) {
@@ -404,7 +413,18 @@ function BettingTabContent({
             <div className="bg-gray-100 p-3 rounded space-y-2">
               <div className="flex justify-between">
                 <span>Tỷ lệ:</span>
-                <span className="font-medium">1 ăn {settings?.bettingRates?.[betType] || "---"}</span>
+                <span className="font-medium">1 ăn {
+                  (() => {
+                    try {
+                      const rates = typeof settings?.bettingRates === 'string' 
+                        ? JSON.parse(settings?.bettingRates) 
+                        : settings?.bettingRates;
+                      return rates?.[betType] || "---";
+                    } catch (e) {
+                      return "---";
+                    }
+                  })()
+                }</span>
               </div>
               <div className="flex justify-between">
                 <span>Tổng tiền cược:</span>
