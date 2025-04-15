@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
@@ -8,6 +8,111 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import HeadTailTable from "@/components/HeadTailTable";
+
+// Thông tin tỉ lệ cược cho các loại cược khác nhau
+const BettingRates = () => {
+  const [rates, setRates] = useState<any>({
+    lo: 80,
+    de: 80,
+    '3cang': 700,
+    'lo_xien_2': 15,
+    'lo_xien_3': 50,
+    'lo_xien_4': 150
+  });
+  const [minBet, setMinBet] = useState<number>(10000);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Lấy dữ liệu tỉ lệ cược từ API
+    fetch('/api/settings/public')
+      .then(res => res.json())
+      .then(data => {
+        if (data.bettingRates) {
+          try {
+            const parsedRates = typeof data.bettingRates === 'string' 
+              ? JSON.parse(data.bettingRates) 
+              : data.bettingRates;
+            setRates(parsedRates);
+          } catch (err) {
+            console.error('Error parsing betting rates:', err);
+          }
+        }
+        
+        if (data.minBetAmount) {
+          setMinBet(Number(data.minBetAmount));
+        }
+        
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching betting rates:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Định dạng số tiền để hiển thị
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+  };
+
+  return (
+    <Card className="mt-6">
+      <CardHeader className="bg-[#428bca] text-white font-bold py-2 px-4 rounded-t-lg">
+        <CardTitle>Tỉ lệ cược</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {loading ? (
+          <div className="p-4 text-center">Đang tải...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 py-2 px-3 text-center font-medium">Loại cược</th>
+                  <th className="border border-gray-300 py-2 px-3 text-center font-medium">Tỉ lệ</th>
+                  <th className="border border-gray-300 py-2 px-3 text-center font-medium">Mức cược tối thiểu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 py-2 px-3">Đề</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates.de}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border border-gray-300 py-2 px-3">Lô</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates.lo}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 py-2 px-3">3 càng</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates['3cang']}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border border-gray-300 py-2 px-3">Lô xiên 2</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates['lo_xien_2']}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 py-2 px-3">Lô xiên 3</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates['lo_xien_3']}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border border-gray-300 py-2 px-3">Lô xiên 4</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">1 ăn {rates['lo_xien_4']}</td>
+                  <td className="border border-gray-300 py-2 px-3 text-center">{formatCurrency(minBet)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function LotteryResultsPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -23,8 +128,9 @@ export default function LotteryResultsPage() {
           <h1 className="text-3xl font-bold">Kết Quả Xổ Số</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <div className="md:col-span-3">
             <Card>
               <CardHeader className="bg-[#d9534f] text-white font-bold py-2 px-4 rounded-t-lg">
                 <CardTitle>Lịch Xổ Số</CardTitle>
@@ -104,10 +210,19 @@ export default function LotteryResultsPage() {
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Bảng tỉ lệ cược */}
+            <BettingRates />
           </div>
           
-          <div className="md:col-span-2">
+          {/* Kết quả xổ số */}
+          <div className="md:col-span-5">
             <LotteryResultTabs />
+          </div>
+          
+          {/* Bảng Đầu-Đuôi */}
+          <div className="md:col-span-4">
+            <HeadTailTable />
           </div>
         </div>
       </div>
