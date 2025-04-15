@@ -8,14 +8,14 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  fullName: text("full_name").notNull(),
-  phoneNumber: text("phone_number").notNull(),
-  bankAccount: text("bank_account"),
-  bankName: text("bank_name"),
+  fullName: text("fullName").notNull(),
+  phoneNumber: text("phoneNumber").notNull(),
+  bankAccount: text("bankAccount"),
+  bankName: text("bankName"),
   balance: real("balance").notNull().default(0),
   role: text("role").notNull().default("user"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -29,17 +29,17 @@ export const insertUserSchema = createInsertSchema(users).omit({
 // Transaction model for deposits/withdrawals
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("userId").notNull().references(() => users.id),
   type: text("type").notNull(), // deposit, withdrawal
   amount: real("amount").notNull(),
   status: text("status").notNull(), // pending, completed, rejected
   method: text("method").notNull(), // bank_transfer, e_wallet
-  bankAccount: text("bank_account"),
-  bankName: text("bank_name"),
+  bankAccount: text("bankAccount"),
+  bankName: text("bankName"),
   reference: text("reference"), // Reference number for the transaction
   notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt"),
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
@@ -62,8 +62,8 @@ export const lotteryResults = pgTable("lottery_results", {
   fifth: jsonb("fifth").notNull(), // Fifth prize (Array)
   sixth: jsonb("sixth").notNull(), // Sixth prize (Array)
   seventh: jsonb("seventh").notNull(), // Seventh prize (Array)
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt"),
 });
 
 export const insertLotteryResultSchema = createInsertSchema(lotteryResults).omit({
@@ -78,7 +78,7 @@ export type BetType = 'lo' | 'de' | '3cang' | 'lo_xien_2' | 'lo_xien_3' | 'lo_xi
 // Bet model
 export const bets = pgTable("bets", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("userId").notNull().references(() => users.id),
   type: text("type").notNull(), // lo, de, 3cang, lo_xien_2, lo_xien_3, lo_xien_4
   numbers: jsonb("numbers").notNull(), // Array of numbers/combinations
   amount: real("amount").notNull(),
@@ -86,8 +86,8 @@ export const bets = pgTable("bets", {
   date: timestamp("date").notNull(), // Date of the lottery draw
   status: text("status").notNull(), // pending, won, lost
   payout: real("payout"), // Payout amount if won
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  settledAt: timestamp("settled_at"), // When the bet was settled
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  settledAt: timestamp("settledAt"), // When the bet was settled
 });
 
 export const insertBetSchema = createInsertSchema(bets).omit({

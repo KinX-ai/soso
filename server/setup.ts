@@ -112,7 +112,7 @@ async function setupAdminAccount() {
 
   // Tạo tài khoản admin mặc định
   await db.execute(sql`
-    INSERT INTO users (username, email, password, full_name, phone_number, role, is_active, balance)
+    INSERT INTO users (username, email, password, "fullName", "phoneNumber", role, "isActive", balance)
     VALUES ('admin', 'admin@example.com', ${hashedPassword}, 'Quan tri vien', '0987654321', 'admin', true, 1000000)
   `);
 
@@ -268,29 +268,29 @@ export async function setupDatabase() {
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        full_name TEXT NOT NULL,
-        phone_number TEXT NOT NULL,
+        "fullName" TEXT NOT NULL,
+        "phoneNumber" TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user',
         balance DOUBLE PRECISION NOT NULL DEFAULT 0,
-        bank_account TEXT,
-        bank_name TEXT,
-        is_active BOOLEAN NOT NULL DEFAULT true,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        "bankAccount" TEXT,
+        "bankName" TEXT,
+        "isActive" BOOLEAN NOT NULL DEFAULT true,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
         type TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
-        user_id INTEGER NOT NULL REFERENCES users(id),
+        "userId" INTEGER NOT NULL REFERENCES users(id),
         amount DOUBLE PRECISION NOT NULL,
         method TEXT NOT NULL,
-        bank_account TEXT,
-        bank_name TEXT,
+        "bankAccount" TEXT,
+        "bankName" TEXT,
         reference TEXT,
         notes TEXT,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        "updatedAt" TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS lottery_results (
@@ -305,7 +305,7 @@ export async function setupDatabase() {
         fifth TEXT[] NOT NULL,
         sixth TEXT[] NOT NULL,
         seventh TEXT[] NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         UNIQUE(date, region)
       );
 
@@ -314,20 +314,20 @@ export async function setupDatabase() {
         date TIMESTAMP NOT NULL,
         type TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
-        user_id INTEGER NOT NULL REFERENCES users(id),
+        "userId" INTEGER NOT NULL REFERENCES users(id),
         amount DOUBLE PRECISION NOT NULL,
         numbers JSONB NOT NULL,
         multiplier DOUBLE PRECISION NOT NULL DEFAULT 1,
         payout DOUBLE PRECISION,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        settled_at TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        "settledAt" TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value JSONB NOT NULL,
         description TEXT,
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS number_stats (
@@ -335,7 +335,7 @@ export async function setupDatabase() {
         date TIMESTAMP NOT NULL,
         region TEXT NOT NULL,
         occurrences INTEGER NOT NULL DEFAULT 1,
-        is_present BOOLEAN NOT NULL DEFAULT true,
+        "isPresent" BOOLEAN NOT NULL DEFAULT true,
         PRIMARY KEY (number, date, region)
       );
     `);
