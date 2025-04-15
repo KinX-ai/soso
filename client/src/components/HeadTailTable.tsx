@@ -37,36 +37,92 @@ const defaultData: HeadTailData = {
   }
 };
 
-export default function HeadTailTable({ title = "Lô tô miền Bắc", data = defaultData }: HeadTailTableProps) {
+export default function HeadTailTable({ title = "Thứ Hai - 14/04/2025", data = defaultData }: HeadTailTableProps) {
   return (
-    <Card>
-      <CardHeader className="bg-[#d9534f] text-white font-bold text-center py-2 px-4 rounded-t-lg">
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
+    <div className="flex flex-col">
+      <div className="flex w-full">
+        <div className="w-1/3 bg-[#cce5ff] p-2 font-bold text-center border border-gray-300">
+          {title}
+        </div>
+        <div className="w-1/3 bg-[#ffdfba] p-2 font-bold text-center border border-gray-300">
+          Đầu
+        </div>
+        <div className="w-1/3 bg-[#ffe6f2] p-2 font-bold text-center border border-gray-300">
+          Đuôi
+        </div>
+      </div>
+      
+      <div className="flex w-full">
+        <div className="w-1/3">
           <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 py-2 px-3 text-center font-medium text-red-600 w-1/12">Đầu</th>
-                <th className="border border-gray-300 py-2 px-3 text-center font-medium text-red-600 w-5/12">Lô Tô</th>
-                <th className="border border-gray-300 py-2 px-3 text-center font-medium text-red-600 w-1/12">Đuôi</th>
-                <th className="border border-gray-300 py-2 px-3 text-center font-medium text-red-600 w-5/12">Lô Tô</th>
+            <tbody>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 w-1/4 font-bold text-center text-blue-800 border-r border-gray-300">ĐB</td>
+                <td className="py-2 px-1 text-center text-red-600 font-bold">46935</td>
               </tr>
-            </thead>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 font-bold text-center text-blue-800 border-r border-gray-300">Nhất</td>
+                <td className="py-2 px-1 text-center">76071</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 font-bold text-center text-blue-800 border-r border-gray-300" rowSpan={2}>Nhì</td>
+                <td className="py-2 px-1 text-center">08866</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">77399</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 font-bold text-center text-blue-800 border-r border-gray-300" rowSpan={6}>Ba</td>
+                <td className="py-2 px-1 text-center">28854</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">16105</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">81240</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">42422</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">16899</td>
+              </tr>
+              <tr className="border border-gray-300">
+                <td className="py-2 px-1 text-center">38673</td>
+              </tr>
+              {/* Thêm các giải còn lại... */}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Bảng Đầu */}
+        <div className="w-1/3">
+          <table className="w-full border-collapse">
             <tbody>
               {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
-                <tr key={digit} className={parseInt(digit) % 2 === 0 ? '' : 'bg-gray-50'}>
-                  <td className="border border-gray-300 py-2 px-3 text-center font-medium">{digit}</td>
-                  <td className="border border-gray-300 py-2 px-3 text-center">{data.head[digit]}</td>
-                  <td className="border border-gray-300 py-2 px-3 text-center font-medium">{digit}</td>
-                  <td className="border border-gray-300 py-2 px-3 text-center">{data.tail[digit]}</td>
+                <tr key={`head-${digit}`} className="border border-gray-300">
+                  <td className="py-2 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
+                  <td className="py-2 px-1 text-center">{data.head[digit]}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </CardContent>
-    </Card>
+        
+        {/* Bảng Đuôi */}
+        <div className="w-1/3">
+          <table className="w-full border-collapse">
+            <tbody>
+              {Array.from({ length: 10 }, (_, i) => i.toString()).map(digit => (
+                <tr key={`tail-${digit}`} className="border border-gray-300">
+                  <td className="py-2 px-1 w-1/5 font-bold text-center border-r border-gray-300">{digit}</td>
+                  <td className="py-2 px-1 text-center">{data.tail[digit]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

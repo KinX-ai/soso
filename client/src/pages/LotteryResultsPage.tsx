@@ -215,14 +215,21 @@ export default function LotteryResultsPage() {
             <BettingRates />
           </div>
           
-          {/* Kết quả xổ số */}
-          <div className="md:col-span-5">
-            <LotteryResultTabs />
-          </div>
-          
-          {/* Bảng Đầu-Đuôi */}
-          <div className="md:col-span-4">
-            <HeadTailTable />
+          {/* Kết quả xổ số và Bảng Đầu-Đuôi */}
+          <div className="md:col-span-9">
+            <div className="mb-4">
+              <Tabs defaultValue="mienbac" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-white">
+                  <TabsTrigger value="mienbac" className="rounded">Miền Bắc</TabsTrigger>
+                  <TabsTrigger value="mientrung" className="rounded">Miền Trung</TabsTrigger>
+                  <TabsTrigger value="miennam" className="rounded">Miền Nam</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
+            <div className="w-full">
+              <HeadTailTable title={`Thứ ${format(date || new Date(), "EEEE", { locale: vi })} - ${format(date || new Date(), "dd/MM/yyyy", { locale: vi })}`} />
+            </div>
           </div>
         </div>
       </div>
