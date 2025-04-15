@@ -53,7 +53,7 @@ async function setupNumberStats() {
       date: today,
       region: 'mienbac',
       occurrences: numData.occurrences,
-      isPresent: true
+      "isPresent": true
     });
   }
 
@@ -107,13 +107,19 @@ async function setupAdminAccount() {
 
   console.log('Đang tạo tài khoản admin mặc định...');
 
-  // Mật khẩu mặc định: admin123
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  // Sử dụng thông tin từ biến môi trường hoặc giá trị mặc định
+  const username = process.env.ADMIN_USERNAME || 'admin';
+  const email = process.env.ADMIN_EMAIL || 'admin@example.com';
+  const password = process.env.ADMIN_PASSWORD || 'admin123';
+  const phone = process.env.ADMIN_PHONE || '0987654321';
+
+  // Hash mật khẩu
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // Tạo tài khoản admin mặc định
   await db.execute(sql`
     INSERT INTO users (username, email, password, "fullName", "phoneNumber", role, "isActive", balance)
-    VALUES ('admin', 'admin@example.com', ${hashedPassword}, 'Quan tri vien', '0987654321', 'admin', true, 1000000)
+    VALUES (${username}, ${email}, ${hashedPassword}, 'Quan tri vien', ${phone}, 'admin', true, 1000000)
   `);
 
   console.log('Đã tạo tài khoản admin mặc định thành công.');
@@ -139,37 +145,43 @@ async function setupDefaultSettings() {
 
   console.log('Đang tạo thiết lập hệ thống mặc định...');
 
+  // Thiết lập mặc định từ biến môi trường hoặc giá trị mặc định
+  const minBet = process.env.MIN_BET_AMOUNT ? parseInt(process.env.MIN_BET_AMOUNT) : 10000;
+  const minDeposit = process.env.MIN_DEPOSIT_AMOUNT ? parseInt(process.env.MIN_DEPOSIT_AMOUNT) : 50000;
+  const minWithdraw = process.env.MIN_WITHDRAW_AMOUNT ? parseInt(process.env.MIN_WITHDRAW_AMOUNT) : 100000;
+  const siteName = process.env.SITE_NAME || 'Rong Bach Kim';
+
   // Thiết lập mặc định
   const defaultSettings = [
     {
       key: 'min_bet_amount',
-      value: 10000,
+      value: minBet,
       description: 'So tien cuoc toi thieu (VND)'
     },
     {
       key: 'min_deposit_amount', 
-      value: 50000,
+      value: minDeposit,
       description: 'So tien nap toi thieu (VND)'
     },
     {
       key: 'min_withdraw_amount',
-      value: 100000,
+      value: minWithdraw,
       description: 'So tien rut toi thieu (VND)'
     },
     {
       key: 'site_name',
-      value: 'Rong Bach Kim',
+      value: JSON.stringify(siteName),
       description: 'Ten trang web'
     },
     {
       key: 'betting_rates',
       value: JSON.stringify({
-        lo: 80,     // Lo: 1 an 80
-        de: 80,     // De: 1 an 80
-        '3cang': 700,  // 3 cang: 1 an 700
-        'lo_xien_2': 15,  // Lo xien 2: 1 an 15
-        'lo_xien_3': 50,  // Lo xien 3: 1 an 50
-        'lo_xien_4': 150  // Lo xien 4: 1 an 150
+        lo: process.env.LO_RATE ? parseInt(process.env.LO_RATE) : 80,
+        de: process.env.DE_RATE ? parseInt(process.env.DE_RATE) : 80,
+        '3cang': process.env.CANG3_RATE ? parseInt(process.env.CANG3_RATE) : 700,
+        'lo_xien_2': process.env.LO_XIEN_2_RATE ? parseInt(process.env.LO_XIEN_2_RATE) : 15,
+        'lo_xien_3': process.env.LO_XIEN_3_RATE ? parseInt(process.env.LO_XIEN_3_RATE) : 50,
+        'lo_xien_4': process.env.LO_XIEN_4_RATE ? parseInt(process.env.LO_XIEN_4_RATE) : 150
       }),
       description: 'Ty le tra thuong'
     },
@@ -177,14 +189,14 @@ async function setupDefaultSettings() {
       key: 'bank_accounts',
       value: JSON.stringify([
         {
-          bank_name: 'BIDV',
-          account_number: '123456789',
-          account_name: 'CONG TY RONG BACH KIM'
+          bank_name: process.env.BANK1_NAME || 'BIDV',
+          account_number: process.env.BANK1_NUMBER || '123456789',
+          account_name: process.env.BANK1_OWNER || 'CONG TY RONG BACH KIM'
         },
         {
-          bank_name: 'Vietcombank',
-          account_number: '987654321',
-          account_name: 'CONG TY RONG BACH KIM'
+          bank_name: process.env.BANK2_NAME || 'Vietcombank',
+          account_number: process.env.BANK2_NUMBER || '987654321',
+          account_name: process.env.BANK2_OWNER || 'CONG TY RONG BACH KIM'
         }
       ]),
       description: 'Danh sach tai khoan ngan hang nhan nap tien'
@@ -193,14 +205,14 @@ async function setupDefaultSettings() {
       key: 'e_wallets',
       value: JSON.stringify([
         {
-          name: 'MoMo',
-          phone: '0987654321',
-          owner: 'RONG BACH KIM'
+          name: process.env.EWALLET1_NAME || 'MoMo',
+          phone: process.env.EWALLET1_PHONE || '0987654321',
+          owner: process.env.EWALLET1_OWNER || 'RONG BACH KIM'
         },
         {
-          name: 'ZaloPay',
-          phone: '0123456789',
-          owner: 'RONG BACH KIM'
+          name: process.env.EWALLET2_NAME || 'ZaloPay',
+          phone: process.env.EWALLET2_PHONE || '0123456789',
+          owner: process.env.EWALLET2_OWNER || 'RONG BACH KIM'
         }
       ]),
       description: 'Danh sach vi dien tu nhan nap tien'

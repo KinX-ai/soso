@@ -3,6 +3,10 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupDatabase } from "./setup";
 import { createServer } from "http";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const server = createServer(app);
@@ -66,8 +70,9 @@ app.use((req, res, next) => {
       serveStatic(app);
     }
 
-    server.listen(5000, "0.0.0.0", () => {
-      log(`Server started on port 5000`);
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server started on port ${PORT}`);
     });
   } catch (error) {
     console.error('Lỗi khởi động server:', error);

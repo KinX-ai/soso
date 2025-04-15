@@ -10,6 +10,7 @@ import { authMiddleware, adminMiddleware } from "./middleware/auth";
 import path from "path";
 import fs from "fs";
 
+// Use JWT secret from environment variables with fallback
 const JWT_SECRET = process.env.JWT_SECRET || "rongbachkim-secret-key";
 const SALT_ROUNDS = 10;
 
