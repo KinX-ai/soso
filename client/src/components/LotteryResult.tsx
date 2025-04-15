@@ -63,7 +63,7 @@ function ExternalLotteryResult({ region }: { region: string }) {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 relative overflow-hidden h-[520px]">
+      <CardContent className="p-0 relative overflow-hidden h-[600px]">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#d9534f]"></div>
@@ -73,7 +73,7 @@ function ExternalLotteryResult({ region }: { region: string }) {
           ref={iframeRef}
           src={apiUrl}
           className="w-full border-0"
-          style={{ height: "520px", overflow: "auto" }}
+          style={{ height: "600px", overflow: "auto" }}
           onLoad={handleIframeLoad}
           title={`Xổ số ${getRegionTitle()}`}
         ></iframe>

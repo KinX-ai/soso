@@ -116,7 +116,7 @@ export default function HeadTailTable({
   return (
     <Card>
       <CardHeader className="bg-[#0275d8] text-white font-condensed font-bold text-lg py-2 px-4 rounded-t-lg">
-        <CardTitle>BẢNG ĐẦU ĐUÔI - {title}</CardTitle>
+        <CardTitle>BẢNG ĐẦU ĐUÔI</CardTitle>
       </CardHeader>
       <CardContent className="p-2">
         <Tabs 
