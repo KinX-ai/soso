@@ -13,7 +13,18 @@ export default function BettingOptions() {
   const minBet = data?.minBetAmount || 10000;
   const getPayoutRate = (type: string) => {
     if (isLoading || !data || !data.bettingRates) return "---";
-    const rates = data.bettingRates;
+    let rates;
+    
+    // Parse bettingRates if it's a string (JSON)
+    try {
+      rates = typeof data.bettingRates === 'string' 
+        ? JSON.parse(data.bettingRates) 
+        : data.bettingRates;
+    } catch (error) {
+      console.error("Error parsing betting rates:", error);
+      return "---";
+    }
+    
     return rates[type] || "---";
   };
 
