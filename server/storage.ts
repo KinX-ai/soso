@@ -360,11 +360,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLotteryResultsByRegion(region: string, limit: number = 10): Promise<LotteryResult[]> {
-    return db.select()
-      .from(lotteryResults)
-      .where(eq(lotteryResults.region, region))
-      .orderBy(desc(lotteryResults.date))
-      .limit(limit);
+    const result = await db.execute(sql`
+      SELECT * FROM lottery_results
+      WHERE region = ${region}
+      ORDER BY date DESC
+      LIMIT ${limit}
+    `);
+    
+    return result.rows as LotteryResult[];
   }
 
   async getLatestLotteryResult(region: string): Promise<LotteryResult | undefined> {
@@ -441,11 +444,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSetting(key: string): Promise<Setting | undefined> {
-    const [setting] = await db.select()
-      .from(settings)
-      .where(eq(settings.key, key));
+    const result = await db.execute(sql`
+      SELECT * FROM settings
+      WHERE key = ${key}
+    `);
       
-    return setting;
+    return result.rows[0] as Setting;
   }
 
   async updateSetting(key: string, value: any, description?: string): Promise<Setting> {
@@ -475,7 +479,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSettings(): Promise<Setting[]> {
-    return db.select().from(settings);
+    const result = await db.execute(sql`
+      SELECT * FROM settings
+    `);
+    
+    return result.rows as Setting[];
   }
 
   async addNumberStat(statData: InsertNumberStat): Promise<NumberStat> {
