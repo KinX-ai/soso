@@ -321,13 +321,24 @@ function BettingTabContent({
       return;
     }
 
+    // Get betting rate from settings
+    let multiplier = 0;
+    try {
+      const rates = typeof settings?.bettingRates === 'string' 
+        ? JSON.parse(settings?.bettingRates) 
+        : settings?.bettingRates;
+      multiplier = rates?.[betType] || 0;
+    } catch (e) {
+      console.error("Error parsing betting rates:", e);
+    }
+
     // Submit bet
     betMutation.mutate({
       type: betType,
       numbers: parsedNumbers,
       amount,
       date: betDate.toISOString(),
-      multiplier: settings?.bettingRates?.[betType] || 0
+      multiplier
     });
   };
 

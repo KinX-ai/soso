@@ -234,18 +234,23 @@ async function setupSampleLotteryResults() {
   const regions = ['mienbac', 'mientrung', 'miennam'];
 
   for (const region of regions) {
-    await db.insert(lotteryResults).values({
-      date: today,
-      region,
-      special: '12345',
-      first: '54321',
-      second: JSON.stringify(['11111', '22222']),
-      third: JSON.stringify(['33333', '44444']),
-      fourth: JSON.stringify(['55555', '66666']),
-      fifth: JSON.stringify(['77777', '88888']),
-      sixth: JSON.stringify(['99999', '00000']),
-      seventh: JSON.stringify(['12121', '23232'])
-    });
+    await db.execute(sql`
+      INSERT INTO lottery_results 
+      (date, region, special, first, second, third, fourth, fifth, sixth, seventh)
+      VALUES 
+      (
+        ${today}, 
+        ${region}, 
+        '12345', 
+        '54321', 
+        '{"11111", "22222"}', 
+        '{"33333", "44444"}', 
+        '{"55555", "66666"}', 
+        '{"77777", "88888"}', 
+        '{"99999", "00000"}', 
+        '{"12121", "23232"}'
+      )
+    `);
   }
 
   console.log('Đã tạo dữ liệu xổ số mẫu thành công.');
