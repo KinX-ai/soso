@@ -10,6 +10,8 @@ import StatisticsBox from "@/components/StatisticsBox";
 import MostFrequentPairs from "@/components/MostFrequentPairs";
 import Resources from "@/components/Resources";
 import { Helmet } from "react-helmet";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const [date] = useState(new Date());
@@ -26,7 +28,15 @@ export default function HomePage() {
         <div className="flex flex-col md:flex-row justify-between gap-6">
           {/* Latest Result Card */}
           <div className="w-full md:w-1/2 lg:w-7/12">
-            <LotteryResult region="mienbac" date={date} />
+            <LotteryResult region="mienbac" useExternalApi={true} />
+            <div className="mt-4 text-right">
+              <Link href="/ket-qua">
+                <Button variant="ghost" className="text-[#d9534f] hover:text-[#d9534f] hover:bg-red-50">
+                  Xem tất cả kết quả
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
           
           {/* Quick Stats Card */}

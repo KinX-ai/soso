@@ -1,16 +1,89 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface LotteryResultProps {
   region?: string;
   date?: Date;
+  useExternalApi?: boolean;
 }
 
-export default function LotteryResult({ region = "mienbac", date }: LotteryResultProps) {
+export default function LotteryResult({ 
+  region = "mienbac", 
+  date, 
+  useExternalApi = false 
+}: LotteryResultProps) {
+  if (useExternalApi) {
+    return <ExternalLotteryResult region={region} />;
+  }
+  
+  return <LocalLotteryResult region={region} date={date} />;
+}
+
+// Component that displays lottery results from xosohanoi.net API
+function ExternalLotteryResult({ region }: { region: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [loading, setLoading] = useState(true);
+  
+  let apiUrl = "https://xosohanoi.net/xsmb-embed";
+  
+  // Set API URL based on region
+  if (region === "mientrung") {
+    apiUrl = "https://xosohanoi.net/xsmt-embed";
+  } else if (region === "miennam") {
+    apiUrl = "https://xosohanoi.net/xsmn-embed";
+  }
+  
+  // Get region title
+  const getRegionTitle = () => {
+    switch(region) {
+      case "mienbac": return "MIỀN BẮC";
+      case "mientrung": return "MIỀN TRUNG";
+      case "miennam": return "MIỀN NAM";
+      default: return "MIỀN BẮC";
+    }
+  };
+  
+  // Handle iframe load event
+  const handleIframeLoad = () => {
+    setLoading(false);
+  };
+  
+  return (
+    <Card>
+      <CardHeader className="bg-[#d9534f] text-white font-condensed font-bold text-lg py-2 px-4 rounded-t-lg">
+        <CardTitle className="flex justify-between items-center text-base md:text-lg">
+          <span>KẾT QUẢ XỔ SỐ {getRegionTitle()}</span>
+          <div className="text-xs md:text-sm font-normal bg-white text-[#d9534f] rounded px-2 py-1">
+            Dữ liệu từ xosohanoi.net
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 relative overflow-hidden">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#d9534f]"></div>
+          </div>
+        )}
+        <iframe
+          ref={iframeRef}
+          src={apiUrl}
+          className="w-full border-0"
+          style={{ height: "500px", minHeight: "500px", overflow: "hidden" }}
+          onLoad={handleIframeLoad}
+          title={`Xổ số ${getRegionTitle()}`}
+        ></iframe>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Component that displays lottery results from our local API
+function LocalLotteryResult({ region = "mienbac", date }: { region: string, date?: Date }) {
   const [formattedDate, setFormattedDate] = useState<string>("");
   
   // Format the date for display
@@ -24,7 +97,9 @@ export default function LotteryResult({ region = "mienbac", date }: LotteryResul
 
   // Fetch lottery result
   const { data, isLoading, error } = useQuery({
-    queryKey: [`/api/lottery/latest/${region}`],
+    queryKey: date 
+      ? [`/api/lottery/date/${format(date, 'yyyy-MM-dd')}`] 
+      : [`/api/lottery/latest/${region}`],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -198,5 +273,27 @@ function LotteryResultSkeleton() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Component that shows lottery results with tabs for different regions
+export function LotteryResultTabs() {
+  return (
+    <Tabs defaultValue="mienbac" className="w-full">
+      <TabsList className="grid w-full grid-cols-3 bg-white">
+        <TabsTrigger value="mienbac" className="rounded">Miền Bắc</TabsTrigger>
+        <TabsTrigger value="mientrung" className="rounded">Miền Trung</TabsTrigger>
+        <TabsTrigger value="miennam" className="rounded">Miền Nam</TabsTrigger>
+      </TabsList>
+      <TabsContent value="mienbac" className="mt-4">
+        <ExternalLotteryResult region="mienbac" />
+      </TabsContent>
+      <TabsContent value="mientrung" className="mt-4">
+        <ExternalLotteryResult region="mientrung" />
+      </TabsContent>
+      <TabsContent value="miennam" className="mt-4">
+        <ExternalLotteryResult region="miennam" />
+      </TabsContent>
+    </Tabs>
   );
 }

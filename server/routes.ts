@@ -432,10 +432,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/lottery/date/:date", async (req: Request, res: Response) => {
     try {
       const { date } = req.params;
-      const parsedDate = new Date(date);
+      
+      // Convert YYYY-MM-DD format to Date object
+      const [year, month, day] = date.split('-').map(Number);
+      const parsedDate = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
       
       if (isNaN(parsedDate.getTime())) {
-        return res.status(400).json({ message: "Invalid date format" });
+        return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD." });
       }
       
       const results = await storage.getLotteryResultsByDate(parsedDate);

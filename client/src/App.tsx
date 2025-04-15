@@ -18,6 +18,7 @@ import AdminUsersPage from "@/pages/AdminUsersPage";
 import AdminTransactionsPage from "@/pages/AdminTransactionsPage";
 import AdminSettingsPage from "@/pages/AdminSettingsPage";
 import AdminLotteryPage from "./pages/AdminLotteryPage";
+import LotteryResultsPage from "@/pages/LotteryResultsPage";
 import { AuthProvider } from "./lib/auth.tsx";
 
 function Router() {
@@ -38,7 +39,8 @@ function Router() {
       <Route path="/admin/transactions" component={AdminTransactionsPage} />
       <Route path="/admin/settings" component={AdminSettingsPage} />
       <Route path="/admin/lottery" component={AdminLotteryPage} />
-      <Route path="/soi-cau" component={LotteryStatsPage} /> {/* Added based on user message */}
+      <Route path="/soi-cau" component={LotteryStatsPage} />
+      <Route path="/ket-qua" component={LotteryResultsPage} />
       <Route component={NotFound} />
     </Switch>
   );
