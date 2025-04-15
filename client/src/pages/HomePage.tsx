@@ -45,7 +45,7 @@ export default function HomePage() {
                   <TabsTrigger value="miennam" className="rounded">Miền Nam</TabsTrigger>
                 </TabsList>
                 <TabsContent value="mienbac" className="mt-4">
-                  <LotteryResult region="mienbac" useExternalApi={false} />
+                  <LotteryResult region="mienbac" useExternalApi={true} />
                 </TabsContent>
                 <TabsContent value="mientrung" className="mt-4">
                   <LotteryResult region="mientrung" useExternalApi={true} />
